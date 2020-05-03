@@ -1,9 +1,8 @@
-.idea/workspace.xml
+#.idea/workspace.xml
 .idea/*.*
 /.idea/
 /cmake-build-debug/
 /cmake-build-release/
-.idea/workspace.xml
 .DS_Store
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
