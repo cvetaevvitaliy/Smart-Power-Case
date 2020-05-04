@@ -89,6 +89,7 @@ void OLED_UI_Task(Device_Status_t *Data){
             break;
 
         default:
+
             break;
     }
 
@@ -714,30 +715,18 @@ static void OLED_UI_Screen_Set_Capacity (Device_Status_t *Data){
 
 static void OLED_UI_Screen_Get_Info (Device_Status_t *Data){
 
+    ssd1306_Draw_Bitmap_Mono(2, 5, &Image_Battery_Type_Ico);
+    ssd1306_Draw_Bitmap_Mono(2, 18, &Image_Battery_Life_Ico);
 
+    ssd1306_Draw_Bitmap_Mono(64, 5, &Image_Used_mAh);
+    ssd1306_Draw_Bitmap_Mono(64, 18, &Image_Charge_Count_Ico);
 
+    if (Data->State_Button.Button_select_pushed )
+        Current_Menu = Current_Screen_Menu_Page_2;
 }
 
 
 static void Draw_Work_Time(Device_Status_t *Data){
-
-    static uint32_t last_time = 0;
-    if (HAL_GetTick() - last_time > 1000){
-        last_time = HAL_GetTick();
-        Data->work_time_second++;
-        if (Data->work_time_second == 60){
-            Data->work_time_minute++;
-            Data->work_time_second = 0;
-            if (Data->work_time_minute == 60) {
-                Data->work_time_minute = 0;
-                Data->work_time_hours++;
-                if (Data->work_time_hours == 10) {
-                    Data->work_time_hours = 0;
-                }
-            }
-        }
-
-    }
 
     if (Data->work_time_second < 10){
         sprintf(print_oled_string, "%d:%d:0%d", Data->work_time_hours, Data->work_time_minute, Data->work_time_second);

@@ -17,6 +17,7 @@ extern I2C_HandleTypeDef hi2c1;
 
 static Device_Status_t Device_Status = {0};
 
+static void Time_Task(Device_Status_t *Data);
 
 void App_Setup(void){
 #ifdef USE_USB_DEBUG_PRINTF
@@ -86,8 +87,29 @@ void App_Check_StartUp(void){
 
 void App_Loop(void){
 
+    Time_Task(&Device_Status);
     ADC_Task(&Device_Status.ADC_Data);
     Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings);
     OLED_UI_Task(&Device_Status);
 
+}
+
+static void Time_Task(Device_Status_t *Data){
+
+    static uint32_t last_time = 0;
+    if (HAL_GetTick() - last_time > 1000){
+        last_time = HAL_GetTick();
+        Data->work_time_second++;
+        if (Data->work_time_second == 60){
+            Data->work_time_minute++;
+            Data->work_time_second = 0;
+            if (Data->work_time_minute == 60) {
+                Data->work_time_minute = 0;
+                Data->work_time_hours++;
+                if (Data->work_time_hours == 10) {
+                    Data->work_time_hours = 0;
+                }
+            }
+        }
+    }
 }
