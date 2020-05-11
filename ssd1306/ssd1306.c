@@ -796,7 +796,7 @@ static void ssd1306_WriteCommand(uint8_t command) {
     while (HAL_I2C_GetState(&SSD1306_I2C_PORT) != HAL_I2C_STATE_READY);
     HAL_I2C_Mem_Write_DMA(&SSD1306_I2C_PORT, SSD1306_I2C_ADDR, 0x00, 1, &command, 1);
 #else
-    HAL_I2C_Mem_Write(&SSD1306_I2C_PORT, SSD1306_I2C_ADDR, 0x00, 1, &command, 1, 10);
+    HAL_I2C_Mem_Write(&SSD1306_I2C_PORT, SSD1306_I2C_ADDR, 0x00, 1, &command, 1, 50);
 #endif
 }
 
@@ -832,4 +832,53 @@ void ssd1306_Start_Scroll_Right(uint8_t start, uint8_t stop){
 void ssd1306_Sop_Scroll(void){
     ssd1306_WriteCommand(SSD1306_DEACTIVATE_SCROLL);
 }
-/* CODE END Public functions */
+
+// Diagonal (vertical and horizontal) scroll setup
+// input:
+//   dir - horizontal scroll direction (one of LCD_SCROLL_XXX values)
+//   start - start page address [0..7]
+//   end - end page address [0..7], must be great or equal to start value
+//   interval - time interval between scroll steps (one of LCD_SCROLL_IFXXX values)
+//   voffs - vertical scrolling offset, this value specifies how many lines will
+//           be scrolled vertically per one scroll step [1..63]
+void SSD1306_ScrollDSetup(uint8_t dir, uint8_t start, uint8_t end, uint8_t interval, uint8_t voffs) {
+    ssd1306_WriteCommand((dir == LCD_SCROLL_RIGHT) ? SSD1306_CMD_SCRL_VHR : SSD1306_CMD_SCRL_VHL);
+    ssd1306_WriteCommand(0x00); // dummy byte
+    ssd1306_WriteCommand(start); // Start page address
+    ssd1306_WriteCommand(interval); // Time interval between each scroll stop in terms of frame frequency
+    ssd1306_WriteCommand(end); // End page address
+    ssd1306_WriteCommand(voffs); // Vertical scrolling offset
+
+}
+
+// Horizontal scroll setup
+// input:
+//   dir - scroll direction (one of LCD_SCROLL_XXX values)
+//   start - start page address [0..7]
+//   end - end page address [0..7], must be great or equal to start value
+//   interval - time interval between scroll steps (one of LCD_SCROLL_IFXXX values)
+void SSD1306_ScrollHSetup(uint8_t dir, uint8_t start, uint8_t end, uint8_t interval) {
+
+    ssd1306_WriteCommand((dir == LCD_SCROLL_RIGHT) ? SSD1306_CMD_SCRL_HR : SSD1306_CMD_SCRL_HL);
+    ssd1306_WriteCommand(0x00); // dummy byte
+    ssd1306_WriteCommand(start); // Start page address
+    ssd1306_WriteCommand(interval); // Time interval between each scroll stop in terms of frame frequency
+    ssd1306_WriteCommand(end); // End page address
+    ssd1306_WriteCommand(0x00); // dummy byte
+    ssd1306_WriteCommand(0xFF); // dummy byte
+
+}
+
+// Activate scrolling
+// note: this function must be called only after scroll setup
+// note: changing of video RAM contents and scroll parameters are prohibited
+//       after the scrolling is activated
+void SSD1306_ScrollStart(void) {
+    ssd1306_WriteCommand(SSD1306_CMD_SCRL_ACT);
+}
+
+// Deactivate scrolling
+// note: after calling this function the graphics RAM data needs to be rewritten
+void SSD1306_ScrollStop(void) {
+    ssd1306_WriteCommand(SSD1306_CMD_SCRL_STOP);
+}

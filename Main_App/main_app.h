@@ -12,6 +12,8 @@
 #endif
 #include "ssd1306.h"
 #include "stdbool.h"
+#include "BQ27441.h"
+
 
 typedef enum {
     Boost_8V = 0,
@@ -57,6 +59,14 @@ typedef struct {
 typedef struct {
     float Vbat;
     uint16_t percent;
+    uint16_t percent_unfiltered;
+    int16_t current;
+    int16_t power;
+    uint16_t capacity;
+    uint16_t capacity_full;
+    float temperature;
+    uint16_t time_to_empty;
+    bool charge_flag;
 
 }Battery_Status_t;
 

@@ -8,6 +8,7 @@
 #include "main_app.h"
 #include "Settings_Eeprom.h"
 #include "OLED_UI_Screens.h"
+#include "Power.h"
 
 
 #define POSITION_BATTERY_X                  97

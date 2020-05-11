@@ -65,10 +65,16 @@
 #define SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL 0x29
 #define SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL 0x2A
 
-#define SWAP_INT16_T(a, b) { int16_t t = a; a = b; b = t; }
-/* CODE END Private defines */
+#define SSD1306_CMD_SCRL_HR   (uint8_t)0x26 // Setup continuous horizontal scroll right
+#define SSD1306_CMD_SCRL_HL   (uint8_t)0x27 // Setup continuous horizontal scroll left
+#define SSD1306_CMD_SCRL_VHR  (uint8_t)0x29 // Setup continuous vertical and horizontal scroll right
+#define SSD1306_CMD_SCRL_VHL  (uint8_t)0x2A // Setup continuous vertical and horizontal scroll left
+#define SSD1306_CMD_SCRL_STOP (uint8_t)0x2E // Deactivate scroll
+#define SSD1306_CMD_SCRL_ACT  (uint8_t)0x2F // Activate scroll
 
-/* CODE BEGIN Private typedefs */
+#define SWAP_INT16_T(a, b) { int16_t t = a; a = b; b = t; }
+
+
 //
 //  Enumeration for screen colors
 //
@@ -91,14 +97,29 @@ typedef struct {
 	uint8_t Inverted;
 	SSD1306_COLOR Color;
 } SSD1306_t;
-/* CODE END Private typedefs */
 
-/* CODE BEGIN External variables */
+enum {
+    LCD_SCROLL_RIGHT = 0, // Scroll right
+    LCD_SCROLL_LEFT  = 1  // Scroll left
+};
+
+// Screen scroll interval enumeration
+enum {
+    LCD_SCROLL_IF2   = 0x07, // 2 frames
+    LCD_SCROLL_IF3   = 0x04, // 3 frames
+    LCD_SCROLL_IF4   = 0x05, // 4 frames
+    LCD_SCROLL_IF5   = 0x00, // 5 frames
+    LCD_SCROLL_IF25  = 0x06, // 25 frames
+    LCD_SCROLL_IF64  = 0x01, // 64 frames
+    LCD_SCROLL_IF128 = 0x02, // 128 frames
+    LCD_SCROLL_IF256 = 0x03  // 256 frames
+};
+
+
 //	Definition of the i2c port in main
 extern I2C_HandleTypeDef SSD1306_I2C_PORT;
 /* CODE END External variables */
 
-/* CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 uint16_t ssd1306_GetWidth(void);
 uint16_t ssd1306_GetHeight(void);
@@ -135,5 +156,10 @@ void ssd1306_Clear(void);
 
 void ssd1306_Start_Scroll_Right(uint8_t start, uint8_t stop);
 void ssd1306_Sop_Scroll(void);
-/* CODE END PFP */
+
+void SSD1306_ScrollDSetup(uint8_t dir, uint8_t start, uint8_t end, uint8_t interval, uint8_t voffs);
+void SSD1306_ScrollHSetup(uint8_t dir, uint8_t start, uint8_t end, uint8_t interval);
+void SSD1306_ScrollStart(void);
+void SSD1306_ScrollStop(void);
+
 #endif /* SSD1306_H_ */

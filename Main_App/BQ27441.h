@@ -109,38 +109,4 @@ bool BQ27441_exitConfig (bool resim);
 uint16_t BQ27441_flags (void);
 uint16_t BQ27441_status (void);
 
-/***************************** Private Functions *****************************/
-
-static bool BQ27441_sealed (void);
-static bool BQ27441_seal (void);
-static bool BQ27441_unseal (void);
-static uint16_t BQ27441_opConfig (void);
-static bool BQ27441_writeOpConfig (uint16_t value);
-bool BQ27441_softReset (void);
-static uint16_t BQ27441_readWord (uint16_t subAddress);
-static uint16_t BQ27441_readControlWord (uint16_t function);
-static bool BQ27441_executeControlWord (uint16_t function);
-
-/*****************************************************************************
- ************************** Extended Data Commands ***************************
- *****************************************************************************/
-
-static bool BQ27441_blockDataControl (void);
-static bool BQ27441_blockDataClass (uint8_t id);
-static bool BQ27441_blockDataOffset (uint8_t offset);
-static uint8_t BQ27441_blockDataChecksum (void);
-static uint8_t BQ27441_readBlockData (uint8_t offset);
-static bool BQ27441_writeBlockData (uint8_t offset, uint8_t data);
-static uint8_t BQ27441_computeBlockChecksum (void);
-static bool BQ27441_writeBlockChecksum (uint8_t csum);
-static uint8_t BQ27441_readExtendedData (uint8_t classID, uint8_t offset);
-static bool BQ27441_writeExtendedData (uint8_t classID, uint8_t offset, uint8_t *data, uint8_t len);
-
-/*****************************************************************************
- ************************ I2C Read and Write Routines ************************
- *****************************************************************************/
-
-static int16_t BQ27441_i2cReadBytes (uint8_t subAddress, uint8_t *dest, uint8_t count);
-static uint16_t BQ27441_i2cWriteBytes (uint8_t subAddress, uint8_t *src, uint8_t count);
-
 #endif //FATSHARK_POWER_V1_BQ27441_H
