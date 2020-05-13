@@ -3,8 +3,43 @@
 ********************************/
 #include "BQ27441.h"
 
-#define USE_DMA_BQ27441
+//#define USE_DMA_BQ27441
 #define BQ27441_I2C_PORT		hi2c1
+
+
+
+static bool BQ27441_sealed (void);
+static bool BQ27441_seal (void);
+static bool BQ27441_unseal (void);
+static uint16_t BQ27441_opConfig (void);
+static bool BQ27441_writeOpConfig (uint16_t value);
+bool BQ27441_softReset (void);
+static uint16_t BQ27441_readWord (uint16_t subAddress);
+static uint16_t BQ27441_readControlWord (uint16_t function);
+static bool BQ27441_executeControlWord (uint16_t function);
+
+/*****************************************************************************
+ ************************** Extended Data Commands ***************************
+ *****************************************************************************/
+
+static bool BQ27441_blockDataControl (void);
+static bool BQ27441_blockDataClass (uint8_t id);
+static bool BQ27441_blockDataOffset (uint8_t offset);
+static uint8_t BQ27441_blockDataChecksum (void);
+static uint8_t BQ27441_readBlockData (uint8_t offset);
+static bool BQ27441_writeBlockData (uint8_t offset, uint8_t data);
+static uint8_t BQ27441_computeBlockChecksum (void);
+static bool BQ27441_writeBlockChecksum (uint8_t csum);
+static uint8_t BQ27441_readExtendedData (uint8_t classID, uint8_t offset);
+static bool BQ27441_writeExtendedData (uint8_t classID, uint8_t offset, uint8_t *data, uint8_t len);
+
+/*****************************************************************************
+ ************************ I2C Read and Write Routines ************************
+ *****************************************************************************/
+
+static int16_t BQ27441_i2cReadBytes (uint8_t subAddress, uint8_t *dest, uint8_t count);
+static uint16_t BQ27441_i2cWriteBytes (uint8_t subAddress, uint8_t *src, uint8_t count);
+
 
 /*****************************************************************************
  ************************** Initialization Functions *************************
@@ -27,14 +62,11 @@ static uint8_t constrain(const uint8_t x, const uint8_t a, const uint8_t b);
 
     @return true if communication was successful.
 */
-bool BQ27441_init(void)
-{
-    if (HAL_I2C_IsDeviceReady(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1),5,20) != HAL_OK)
+bool BQ27441_init(void) {
+    if (HAL_I2C_IsDeviceReady(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), 5, 20) != HAL_OK)
         return false;
 
-
-    if (BQ27441_deviceType() == BQ27441_DEVICE_ID) // Read deviceType from BQ27441
-    {
+    if (BQ27441_deviceType() == BQ27441_DEVICE_ID) { // Read deviceType from BQ27441
         return true; // If device ID is valid, return true
     }
 
@@ -47,8 +79,7 @@ bool BQ27441_init(void)
     @param capacity of battery (unsigned 16-bit value)
     @return true if capacity successfully set.
 */
-bool BQ27441_setCapacity(uint16_t capacity)
-{
+bool BQ27441_setCapacity(uint16_t capacity) {
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x0A (10)
     // Design capacity is a 2-byte piece of data - MSB first
@@ -65,8 +96,7 @@ bool BQ27441_setCapacity(uint16_t capacity)
     @param energy of battery (unsigned 16-bit value)
     @return true if energy successfully set.
 */
-bool BQ27441_setDesignEnergy(uint16_t energy)
-{
+bool BQ27441_setDesignEnergy(uint16_t energy) {
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x0C (12)
     // Design energy is a 2-byte piece of data - MSB first
@@ -83,15 +113,14 @@ bool BQ27441_setDesignEnergy(uint16_t energy)
     @param voltage of battery (unsigned 16-bit value)
     @return true if energy successfully set.
 */
-bool BQ27441_setTerminateVoltage(uint16_t voltage)
-{
+bool BQ27441_setTerminateVoltage(uint16_t voltage) {
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x0F (16)
     // Termiante voltage is a 2-byte piece of data - MSB first
     // Unit: mV
     // Min 2500, Max 3700
-    if(voltage<2500) voltage=2500;
-    if(voltage>3700) voltage=3700;
+    if (voltage < 2500) voltage = 2500;
+    if (voltage > 3700) voltage = 3700;
 
     uint8_t tvMSB = voltage >> 8;
     uint8_t tvLSB = voltage & 0x00FF;
@@ -100,14 +129,13 @@ bool BQ27441_setTerminateVoltage(uint16_t voltage)
 }
 
 // Configures taper rate of connected battery.
-bool BQ27441_setTaperRate(uint16_t rate)
-{
+bool BQ27441_setTaperRate(uint16_t rate) {
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x1B (27)
     // Termiante voltage is a 2-byte piece of data - MSB first
     // Unit: 0.1h
     // Max 2000
-    if(rate>2000) rate=2000;
+    if (rate > 2000) rate = 2000;
     uint8_t trMSB = rate >> 8;
     uint8_t trLSB = rate & 0x00FF;
     uint8_t trData[2] = {trMSB, trLSB};
@@ -123,8 +151,7 @@ bool BQ27441_setTaperRate(uint16_t rate)
 
     @return battery voltage in mV
 */
-uint16_t BQ27441_voltage(void)
-{
+uint16_t BQ27441_voltage(void) {
     return BQ27441_readWord(BQ27441_COMMAND_VOLTAGE);
 }
 
@@ -134,12 +161,10 @@ uint16_t BQ27441_voltage(void)
     @param current_measure enum specifying current value to be read
     @return specified current measurement in mA. >0 indicates charging.
 */
-int16_t BQ27441_current(current_measure type)
-{
+int16_t BQ27441_current(current_measure type) {
     //type = AVG;
     int16_t current = 0;
-    switch (type)
-    {
+    switch (type) {
         case AVG:
             current = (int16_t) BQ27441_readWord(BQ27441_COMMAND_AVG_CURRENT);
             break;
@@ -160,12 +185,10 @@ int16_t BQ27441_current(current_measure type)
     @param capacity_measure enum specifying capacity value to be read
     @return specified capacity measurement in mAh.
 */
-uint16_t BQ27441_capacity(capacity_measure type)
-{
+uint16_t BQ27441_capacity(capacity_measure type) {
     //type = REMAIN;
     uint16_t capacity = 0;
-    switch (type)
-    {
+    switch (type) {
         case REMAIN:
             return BQ27441_readWord(BQ27441_COMMAND_REM_CAPACITY);
             break;
@@ -192,6 +215,9 @@ uint16_t BQ27441_capacity(capacity_measure type)
             break;
         case DESIGN:
             capacity = BQ27441_readWord(BQ27441_EXTENDED_CAPACITY);
+
+        default:
+            return BQ27441_readWord(BQ27441_COMMAND_REM_CAPACITY);
     }
 
     return capacity;
@@ -202,8 +228,7 @@ uint16_t BQ27441_capacity(capacity_measure type)
 
     @return average power in mAh. >0 indicates charging.
 */
-int16_t BQ27441_power(void)
-{
+int16_t BQ27441_power(void) {
     return (int16_t) BQ27441_readWord(BQ27441_COMMAND_AVG_POWER);
 }
 
@@ -213,12 +238,10 @@ int16_t BQ27441_power(void)
     @param soc_measure enum specifying filtered or unfiltered measurement
     @return specified state of charge measurement in %
 */
-uint16_t BQ27441_soc(soc_measure type)
-{
+uint16_t BQ27441_soc(soc_measure type) {
     //type = FILTERED;
     uint16_t socRet = 0;
-    switch (type)
-    {
+    switch (type) {
         case FILTERED:
             socRet = BQ27441_readWord(BQ27441_COMMAND_SOC);
             break;
@@ -236,8 +259,7 @@ uint16_t BQ27441_soc(soc_measure type)
     @param soh_measure enum specifying filtered or unfiltered measurement
     @return specified state of health measurement in %, or status bits
 */
-uint8_t BQ27441_soh(soh_measure type)
-{
+uint8_t BQ27441_soh(soh_measure type) {
     //type = PERCENT;
     uint16_t sohRaw = BQ27441_readWord(BQ27441_COMMAND_SOH);
     uint8_t sohStatus = sohRaw >> 8;
@@ -255,12 +277,10 @@ uint8_t BQ27441_soh(soh_measure type)
     @param temp_measure enum specifying internal or battery measurement
     @return specified temperature measurement in degrees C
 */
-uint16_t BQ27441_temperature(temp_measure type)
-{
+uint16_t BQ27441_temperature(temp_measure type) {
     //type = BATTERY;
     uint16_t temp = 0;
-    switch (type)
-    {
+    switch (type) {
         case BATTERY:
             temp = BQ27441_readWord(BQ27441_COMMAND_TEMP);
             break;
@@ -280,8 +300,7 @@ uint16_t BQ27441_temperature(temp_measure type)
 
     @return true if active-high, false if active-low
 */
-bool BQ27441_GPOUTPolarity(void)
-{
+bool BQ27441_GPOUTPolarity(void) {
     uint16_t opConfigRegister = BQ27441_opConfig();
 
     return (opConfigRegister & BQ27441_OPCONFIG_GPIOPOL);
@@ -293,8 +312,7 @@ bool BQ27441_GPOUTPolarity(void)
     @param activeHigh is true if active-high, false if active-low
     @return true on success
 */
-bool BQ27441_setGPOUTPolarity(bool activeHigh)
-{
+bool BQ27441_setGPOUTPolarity(bool activeHigh) {
     uint16_t oldOpConfig = BQ27441_opConfig();
 
     // Check to see if we need to update opConfig:
@@ -316,8 +334,7 @@ bool BQ27441_setGPOUTPolarity(bool activeHigh)
 
     @return true if BAT_LOW or false if SOC_INT
 */
-bool BQ27441_GPOUTFunction(void)
-{
+bool BQ27441_GPOUTFunction(void) {
     uint16_t opConfigRegister = BQ27441_opConfig();
 
     return (opConfigRegister & BQ27441_OPCONFIG_BATLOWEN);
@@ -329,8 +346,7 @@ bool BQ27441_GPOUTFunction(void)
     @param function should be either BAT_LOW or SOC_INT
     @return true on success
 */
-bool BQ27441_setGPOUTFunction(gpout_function function)
-{
+bool BQ27441_setGPOUTFunction(gpout_function function) {
     uint16_t oldOpConfig = BQ27441_opConfig();
 
     // Check to see if we need to update opConfig:
@@ -544,25 +560,25 @@ uint16_t BQ27441_deviceType(void)
     and exiting config mode (should be false in library calls).
     @return true on success
 */
-bool BQ27441_enterConfig(bool userControl)
-{
-    //userControl = true;
-    if (userControl) userConfigControl = true;
+bool BQ27441_enterConfig(bool userControl) {
+    userControl = true;
+    if (userControl) {
+        userConfigControl = true;
 
-    if (BQ27441_sealed())
-    {
-        sealFlag = true;
-        BQ27441_unseal(); // Must be unsealed before making changes
-    }
+        if (BQ27441_sealed()) {
+            sealFlag = true;
+            BQ27441_unseal(); // Must be unsealed before making changes
+        }
 
-    if (BQ27441_executeControlWord(BQ27441_CONTROL_SET_CFGUPDATE))
-    {
-        int16_t timeout = BQ72441_I2C_TIMEOUT;
-        while ((timeout--) && (!(BQ27441_flags() & BQ27441_FLAG_CFGUPMODE)))
-            HAL_Delay(1);
+        if (BQ27441_executeControlWord(BQ27441_CONTROL_SET_CFGUPDATE)) {
+            int16_t timeout = BQ72441_I2C_TIMEOUT;
+            HAL_Delay(2000);
+            while ((timeout--) && (!(BQ27441_flags() & BQ27441_FLAG_CFGUPMODE)))
+                HAL_Delay(1);
 
-        if (timeout > 0)
-            return true;
+            if (timeout > 0)
+                return true;
+        }
     }
 
     return false;
@@ -574,8 +590,7 @@ bool BQ27441_enterConfig(bool userControl)
     @param resim is true if resimulation should be performed after exiting
     @return true on success
 */
-bool BQ27441_exitConfig(bool resim)
-{
+bool BQ27441_exitConfig(bool resim) {
     //resim = true;
     // There are two methods for exiting config mode:
     //    1. Execute the EXIT_CFGUPDATE command
@@ -584,23 +599,18 @@ bool BQ27441_exitConfig(bool resim)
     // measurement, and without resimulating to update unfiltered-SoC and SoC.
     // If a new OCV measurement or resimulation is desired, SOFT_RESET or
     // EXIT_RESIM should be used to exit config mode.
-    if (resim)
-    {
-        if (BQ27441_softReset())
-        {
+    if (resim) {
+        if (BQ27441_softReset()) {
             int16_t timeout = BQ72441_I2C_TIMEOUT;
             while ((timeout--) && ((BQ27441_flags() & BQ27441_FLAG_CFGUPMODE)))
                 HAL_Delay(1);
-            if (timeout > 0)
-            {
+            if (timeout > 0) {
                 if (sealFlag) BQ27441_seal(); // Seal back up if we IC was sealed coming in
                 return true;
             }
         }
         return false;
-    }
-    else
-    {
+    } else {
         return BQ27441_executeControlWord(BQ27441_CONTROL_EXIT_CFGUPDATE);
     }
 }
@@ -610,8 +620,7 @@ bool BQ27441_exitConfig(bool resim)
 
     @return 16-bit representation of flags() command register
 */
-uint16_t BQ27441_flags(void)
-{
+uint16_t BQ27441_flags(void) {
     return BQ27441_readWord(BQ27441_COMMAND_FLAGS);
 }
 
@@ -620,8 +629,7 @@ uint16_t BQ27441_flags(void)
 
     @return 16-bit representation of CONTROL_STATUS subcommand
 */
-uint16_t BQ27441_status(void)
-{
+uint16_t BQ27441_status(void) {
     return BQ27441_readControlWord(BQ27441_CONTROL_STATUS);
 }
 
@@ -632,8 +640,7 @@ uint16_t BQ27441_status(void)
 
     @return true if the chip is sealed
 */
-static bool BQ27441_sealed(void)
-{
+static bool BQ27441_sealed(void) {
     uint16_t stat = BQ27441_status();
     return stat & BQ27441_STATUS_SS;
 }
@@ -643,8 +650,7 @@ static bool BQ27441_sealed(void)
 
     @return true on success
 */
-static bool BQ27441_seal(void)
-{
+static bool BQ27441_seal(void) {
     return BQ27441_readControlWord(BQ27441_CONTROL_SEALED);
 }
 
@@ -653,12 +659,10 @@ static bool BQ27441_seal(void)
 
     @return true on success
 */
-static bool BQ27441_unseal(void)
-{
+static bool BQ27441_unseal(void) {
     // To unseal the BQ27441, write the key to the control
     // command. Then immediately write the same key to control again.
-    if (BQ27441_readControlWord(BQ27441_UNSEAL_KEY))
-    {
+    if (BQ27441_readControlWord(BQ27441_UNSEAL_KEY)) {
         return BQ27441_readControlWord(BQ27441_UNSEAL_KEY);
     }
     return false;
@@ -669,8 +673,7 @@ static bool BQ27441_unseal(void)
 
     @return opConfig register contents
 */
-static uint16_t BQ27441_opConfig(void)
-{
+static uint16_t BQ27441_opConfig(void) {
     return BQ27441_readWord(BQ27441_EXTENDED_OPCONFIG);
 }
 
@@ -680,8 +683,7 @@ static uint16_t BQ27441_opConfig(void)
     @param New 16-bit value for opConfig
     @return true on success
 */
-static bool BQ27441_writeOpConfig(uint16_t value)
-{
+static bool BQ27441_writeOpConfig(uint16_t value) {
     uint8_t opConfigMSB = value >> 8;
     uint8_t opConfigLSB = value & 0x00FF;
     uint8_t opConfigData[2] = {opConfigMSB, opConfigLSB};
@@ -695,8 +697,7 @@ static bool BQ27441_writeOpConfig(uint16_t value)
 
     @return true on success
 */
-bool BQ27441_softReset(void)
-{
+bool BQ27441_softReset(void) {
     return BQ27441_executeControlWord(BQ27441_CONTROL_SOFT_RESET);
 }
 
@@ -706,8 +707,7 @@ bool BQ27441_softReset(void)
     @param subAddress is the command to be read from
     @return 16-bit value of the command's contents
 */
-static uint16_t BQ27441_readWord(uint16_t subAddress)
-{
+static uint16_t BQ27441_readWord(uint16_t subAddress) {
     uint8_t data[2];
     BQ27441_i2cReadBytes(subAddress, data, 2);
     return ((uint16_t) data[1] << 8) | data[0];
@@ -719,18 +719,17 @@ static uint16_t BQ27441_readWord(uint16_t subAddress)
     @param function is the subcommand of control() to be read
     @return 16-bit value of the subcommand's contents
 */
-static uint16_t BQ27441_readControlWord(uint16_t function)
-{
+static uint16_t BQ27441_readControlWord(uint16_t function) {
     uint8_t subCommandMSB = (function >> 8);
     uint8_t subCommandLSB = (function & 0x00FF);
     uint8_t command[2] = {subCommandLSB, subCommandMSB};
     uint8_t data[2] = {0, 0};
+    uint16_t com = subCommandMSB << 8 | subCommandLSB;
 
     BQ27441_i2cWriteBytes((uint8_t) 0, command, 2);
 
-    if (BQ27441_i2cReadBytes((uint8_t) 0, data, 2))
-    {
-        return ((uint16_t)data[1] << 8) | data[0];
+    if (BQ27441_i2cReadBytes((uint8_t) 0, data, 2)) {
+        return ((uint16_t) data[1] << 8) | data[0];
     }
 
     return false;
@@ -742,8 +741,7 @@ static uint16_t BQ27441_readControlWord(uint16_t function)
     @param function is the subcommand of control() to be executed
     @return true on success
 */
-static bool BQ27441_executeControlWord(uint16_t function)
-{
+static bool BQ27441_executeControlWord(uint16_t function) {
     uint8_t subCommandMSB = (function >> 8);
     uint8_t subCommandLSB = (function & 0x00FF);
     uint8_t command[2] = {subCommandLSB, subCommandMSB};
@@ -870,8 +868,7 @@ static bool BQ27441_writeBlockChecksum(uint8_t csum)
            offset is the byte position of the byte to be read
     @return 8-bit value of specified data
 */
-static uint8_t BQ27441_readExtendedData(uint8_t classID, uint8_t offset)
-{
+static uint8_t BQ27441_readExtendedData(uint8_t classID, uint8_t offset) {
     uint8_t retData = 0;
     if (!userConfigControl) BQ27441_enterConfig(false);
 
@@ -903,8 +900,7 @@ static uint8_t BQ27441_readExtendedData(uint8_t classID, uint8_t offset)
            len is the number of bytes to be written
     @return true on success
 */
-static bool BQ27441_writeExtendedData(uint8_t classID, uint8_t offset, uint8_t * data, uint8_t len)
-{
+static bool BQ27441_writeExtendedData(uint8_t classID, uint8_t offset, uint8_t * data, uint8_t len) {
     if (len > 32)
         return false;
 
@@ -920,8 +916,7 @@ static bool BQ27441_writeExtendedData(uint8_t classID, uint8_t offset, uint8_t *
     uint8_t oldCsum = BQ27441_blockDataChecksum();
 
     // Write data bytes:
-    for (int i = 0; i < len; i++)
-    {
+    for (int i = 0; i < len; i++) {
         // Write to offset, mod 32 if offset is greater than 32
         // The blockDataOffset above sets the 32-bit block
         BQ27441_writeBlockData((offset % 32) + i, data[i]);
@@ -956,7 +951,7 @@ static int16_t BQ27441_i2cReadBytes(uint8_t subAddress, uint8_t * dest, uint8_t 
     while(HAL_I2C_GetState(&BQ27441_I2C_PORT) != HAL_I2C_STATE_READY);
     HAL_I2C_Mem_Read_DMA(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), subAddress, 1, dest, count);
 #else
-    HAL_I2C_Mem_Read(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), subAddress, 1, dest, count, 10);
+    HAL_I2C_Mem_Read(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), subAddress, 1, dest, count, 50);
 #endif
 
 //    Wire.beginTransmission(_deviceAddress);
@@ -988,7 +983,7 @@ static uint16_t BQ27441_i2cWriteBytes(uint8_t subAddress, uint8_t * src, uint8_t
     while(HAL_I2C_GetState(&BQ27441_I2C_PORT) != HAL_I2C_STATE_READY);
     HAL_I2C_Mem_Write_DMA(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), subAddress, 1, src, count);
 #else
-    HAL_I2C_Mem_Write(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), subAddress, 1, src, count, 10);
+    HAL_I2C_Mem_Write(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), subAddress, 1, src, count, 50);
 #endif
     //if(HAL_I2C_Mem_Read(&hi2c1,(BQ72441_I2C_ADDRESS << 1),reg,1,data,1,25)==HAL_OK)
 //    Wire.beginTransmission(_deviceAddress);

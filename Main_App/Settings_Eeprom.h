@@ -9,6 +9,8 @@
 void Settings_Get(Device_Settings_t *Data);
 void Settings_Set(Device_Settings_t *Data);
 void Settings_Set_Default(Device_Settings_t *Data);
+void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity);
+void Settings_Set_BQ27441_Set_Min_Liion_Volt(uint16_t volt);
 
 
 #endif //FATSHARK_POWER_V1_SETTINGS_EEPROM_H

@@ -5,7 +5,7 @@
 
 #define V_25                        (1.43f)
 #define SLOPE                       (0.0043f)
-#define VREF                        (3.33f)
+#define VREF                        (3.3f)
 #define ADC_MAX_OUTPUT_VALUE        (4095.0f)
 
 #define VBUS_R1                     (97600.0f)
@@ -28,9 +28,9 @@ void ADC_Task(ADC_Voltage_Data_t *Data){
 
     static uint32_t adc_time_get = 0;
     if (HAL_GetTick() - adc_time_get > 350) {
-        Data->Vbus = ((float) adc_raw_data[0] * VREF / ADC_MAX_OUTPUT_VALUE) / (VBUS_R2 / (VBUS_R2 + VBUS_R1));
-        Data->Vout = ((float) adc_raw_data[1] * VREF / ADC_MAX_OUTPUT_VALUE) / (VOUT_R2 / (VOUT_R2 + VOUT_R1));
-        Data->temperature = ((V_25 - ((float) adc_raw_data[2] / ADC_MAX_OUTPUT_VALUE * VREF)) / SLOPE);
+        Data->Vout = ((float) adc_raw_data[0] * VREF / ADC_MAX_OUTPUT_VALUE) / (VBUS_R2 / (VBUS_R2 + VBUS_R1));
+        Data->Vbus = ((float) adc_raw_data[1] * VREF / ADC_MAX_OUTPUT_VALUE) / (VOUT_R2 / (VOUT_R2 + VOUT_R1));
+        Data->temperature = ((V_25 - ((float) adc_raw_data[2] / ADC_MAX_OUTPUT_VALUE * VREF)) / SLOPE) + 25;
         adc_time_get = HAL_GetTick();
     }
 
@@ -45,5 +45,5 @@ float ADC_Get_Vout(void){
 }
 
 float ADC_Get_Temperature_PCB(void){
-    return ((V_25 - ((float)adc_raw_data[2] / ADC_MAX_OUTPUT_VALUE * VREF)) / SLOPE );
+    return ((V_25 - ((float)adc_raw_data[2] / ADC_MAX_OUTPUT_VALUE * VREF)) / SLOPE ) + 25;
 }

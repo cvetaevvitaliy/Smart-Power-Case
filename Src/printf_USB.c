@@ -12,4 +12,9 @@ int _write(int file,char *ptr, int len)
    return len;
 }
 
+void clrscr(void){
+    printf("\033[2J"); /* Clear the entire screen. */
+    printf("\033[0;0f"); /* Move cursor to the top left hand corner */
+}
+
 #endif
