@@ -46,7 +46,6 @@ extern DMA_HandleTypeDef hdma_i2c1_tx;
 extern DMA_HandleTypeDef hdma_i2c1_rx;
 extern I2C_HandleTypeDef hi2c1;
 extern TIM_HandleTypeDef htim2;
-extern TIM_HandleTypeDef htim1;
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
@@ -318,16 +317,6 @@ void TIM2_IRQHandler(void)
   static bool buzzer = false;
 
   /* USER CODE END TIM2_IRQn 0 */
-  if (buzzer) {
-      HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-      HAL_TIM_Base_Start_IT(&htim2);
-      buzzer = false;
-  } else{
-    HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-    HAL_TIM_Base_Stop_IT(&htim2);
-    buzzer = true;
-  }
-    //buzzer = false;
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
 

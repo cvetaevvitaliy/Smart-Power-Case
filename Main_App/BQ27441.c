@@ -113,7 +113,7 @@ bool BQ27441_setDesignEnergy(uint16_t energy) {
     @param voltage of battery (unsigned 16-bit value)
     @return true if energy successfully set.
 */
-bool BQ27441_setTerminateVoltage(uint16_t voltage) {
+bool BQ27441_setTerminateVoltageMin(uint16_t voltage) {
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x0F (16)
     // Termiante voltage is a 2-byte piece of data - MSB first
@@ -126,6 +126,20 @@ bool BQ27441_setTerminateVoltage(uint16_t voltage) {
     uint8_t tvLSB = voltage & 0x00FF;
     uint8_t tvData[2] = {tvMSB, tvLSB};
     return BQ27441_writeExtendedData(BQ27441_ID_STATE, 16, tvData, 2);
+}
+
+bool BQ27441_setTerminateVoltageMax(uint16_t voltage){
+    // Write to STATE subclass (82) of BQ27441 extended memory.
+    // Offset 0x21 (33)
+    // Termiante voltage is a 2-byte piece of data - MSB first
+    // Unit: mV
+    // Min 0, Max 5000
+
+    uint8_t tvMSB = voltage >> 8;
+    uint8_t tvLSB = voltage & 0x00FF;
+    uint8_t tvData[2] = {tvMSB, tvLSB};
+    return BQ27441_writeExtendedData(BQ27441_ID_STATE, 33, tvData, 2);
+
 }
 
 // Configures taper rate of connected battery.
@@ -572,7 +586,6 @@ bool BQ27441_enterConfig(bool userControl) {
 
         if (BQ27441_executeControlWord(BQ27441_CONTROL_SET_CFGUPDATE)) {
             int16_t timeout = BQ72441_I2C_TIMEOUT;
-            HAL_Delay(2000);
             while ((timeout--) && (!(BQ27441_flags() & BQ27441_FLAG_CFGUPMODE)))
                 HAL_Delay(1);
 
@@ -591,7 +604,7 @@ bool BQ27441_enterConfig(bool userControl) {
     @return true on success
 */
 bool BQ27441_exitConfig(bool resim) {
-    //resim = true;
+    resim = true;
     // There are two methods for exiting config mode:
     //    1. Execute the EXIT_CFGUPDATE command
     //    2. Execute the SOFT_RESET command

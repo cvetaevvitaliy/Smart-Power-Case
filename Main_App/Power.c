@@ -62,7 +62,7 @@ void Power_Battery_Task(Device_Status_t *Data){
 
         Data->Battery_Info.temperature = BQ27441_temperature(BATTERY) / 100.0;
         Data->Battery_Info.capacity = BQ27441_capacity(REMAIN);
-        Data->Battery_Info.capacity_full = BQ27441_capacity(FULL_UF);
+        Data->Battery_Info.capacity_full = BQ27441_capacity(AVAIL_FULL);
         Data->Battery_Info.Vbat = BQ27441_voltage() / 1000.0;
         Data->Battery_Info.percent = BQ27441_soc(FILTERED);
         Data->Battery_Info.percent_unfiltered = BQ27441_soc(UNFILTERED);

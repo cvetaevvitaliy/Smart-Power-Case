@@ -17,6 +17,7 @@ uint32_t time_delay = 0;
 
 extern DMA_HandleTypeDef hdma_adc1;
 extern I2C_HandleTypeDef hi2c1;
+extern RTC_HandleTypeDef hrtc;
 
 static Device_Status_t Device_Status = {0};
 
@@ -78,6 +79,15 @@ void App_Check_StartUp(void){
             Power_Boost_Enable_12V(true);
         else
             Power_Boost_Enable_12V(false);
+    }
+    if (HAL_RTCEx_BKUPRead(&hrtc,1) == 0) {
+        ssd1306_Draw_String("Find NEW BAT", 0, 0, &Font_8x10);
+        ssd1306_Draw_String("Please", 0, 10, &Font_8x10);
+        ssd1306_Draw_String("Recalibrate", 0, 20, &Font_8x10);
+        ssd1306_UpdateScreen();
+        Settings_Set_BQ27441_Set_Max_Liion_Volt(4180);
+        Settings_Set_BQ27441_Set_Capacity(6000);
+        HAL_RTCEx_BKUPWrite(&hrtc,1,1);
     }
 
 }
