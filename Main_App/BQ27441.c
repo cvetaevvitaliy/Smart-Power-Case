@@ -128,7 +128,7 @@ bool BQ27441_setTerminateVoltageMin(uint16_t voltage) {
     return BQ27441_writeExtendedData(BQ27441_ID_STATE, 16, tvData, 2);
 }
 
-bool BQ27441_setTerminateVoltageMax(uint16_t voltage){
+bool BQ27441_setChargeTermination(uint16_t voltage){
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x21 (33)
     // Termiante voltage is a 2-byte piece of data - MSB first
@@ -617,7 +617,7 @@ bool BQ27441_enterConfig(bool userControl) {
     @return true on success
 */
 bool BQ27441_exitConfig(bool resim) {
-    resim = true;
+    //resim = true;
     // There are two methods for exiting config mode:
     //    1. Execute the EXIT_CFGUPDATE command
     //    2. Execute the SOFT_RESET command

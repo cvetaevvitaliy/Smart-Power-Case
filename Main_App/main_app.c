@@ -99,23 +99,21 @@ void App_Check_StartUp(void){
         else
             Power_Boost_Enable_12V(false);
     }
-    if (HAL_RTCEx_BKUPRead(&hrtc,1) == 0) {
+    if (BQ27441_itporFlag() ) {
         ssd1306_Draw_String("Find NEW BAT", 0, 0, &Font_8x10);
         ssd1306_Draw_String("Please", 0, 10, &Font_8x10);
         ssd1306_Draw_String("Recalibrate", 0, 20, &Font_8x10);
         ssd1306_UpdateScreen();
-        Settings_Set_BQ27441_Set_Max_Liion_Volt(4145);
-        Settings_Set_BQ27441_Set_Min_Liion_Volt(2900);
-        BQ27441_setTaperRateVoltage(4100);
+        //Settings_Set_BQ27441_Set_Max_Liion_Volt(4145);
+       // Settings_Set_BQ27441_Set_Min_Liion_Volt(2900);
+        //BQ27441_setTaperRateVoltage(4100);
         //Settings_Set_BQ27441_Set_Capacity(6000);
         Device_Status.need_calibrate = true;
         HAL_RTCEx_BKUPWrite(&hrtc,1,1);
         HAL_Delay(2000);
     } else {
         Device_Status.need_calibrate = false;
-        Settings_Set_BQ27441_Set_Max_Liion_Volt(4145);
-        Settings_Set_BQ27441_Set_Min_Liion_Volt(Device_Status.Device_Settings.low_volt);
-        //BQ27441_setTaperRateVoltage(4150);
+       // Settings_Set_BQ27441_Set_Min_Liion_Volt(Device_Status.Device_Settings.low_volt);
     }
 
 }

@@ -73,6 +73,9 @@ void Power_Battery_Task(Device_Status_t *Data){
         Data->Battery_Info.current = BQ27441_current(AVG);
         Data->Battery_Info.power = BQ27441_power();
         Data->Battery_Info.health = BQ27441_soh(PERCENT);
+        Data->Battery_Info.charge_detect = BQ27441_fcFlag();
+        Data->Battery_Info.fast_charge = BQ27441_chgFlag();
+        Data->Battery_Info.battery_discharging = BQ27441_dsgFlag();
 
         if (Data->ADC_Data.Vbus > 3.5)
             Data->Battery_Info.charge_flag = true;
@@ -104,7 +107,7 @@ void Power_Battery_Task(Device_Status_t *Data){
             bq2589x_enter_hiz_mode();
         }
 
-        if (Data->Battery_Info.current > -300 && Data->Battery_Info.current < 100)
+        if (Data->Battery_Info.current > -300 && Data->Battery_Info.current < 100 && Data->ChargeChip.Vbus < 3500)
         {
             if (start_timer_auto_off == false) {
                 time_auto_off = HAL_GetTick();
