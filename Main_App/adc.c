@@ -5,7 +5,7 @@
 
 #define V_25                        (1.43f)
 #define SLOPE                       (0.0043f)
-#define VREF                        (3.3f)
+#define VREF                        (2.25f)
 #define ADC_MAX_OUTPUT_VALUE        (4095.0f)
 
 #define VBUS_R1                     (97600.0f)

@@ -60,8 +60,10 @@ bool BQ27441_init (void);
 
 bool BQ27441_setCapacity (uint16_t capacity);
 bool BQ27441_setDesignEnergy (uint16_t energy);
-bool BQ27441_setTerminateVoltage (uint16_t voltage);
-bool BQ27441_setTaperRate (uint16_t rate);
+bool BQ27441_setTerminateVoltageMin (uint16_t voltage);
+bool BQ27441_setTerminateVoltageMax(uint16_t voltage);
+bool BQ27441_setTaperRateTime (uint16_t rate);
+bool BQ27441_setTaperRateVoltage(uint16_t voltage);
 
 /*****************************************************************************
  ********************** Battery Characteristics Functions ********************

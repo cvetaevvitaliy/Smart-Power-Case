@@ -25,7 +25,7 @@ SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
 
 SET(COMMON_FLAGS
     "-mcpu=cortex-m3 ${FPU_FLAGS} -mthumb -mthumb-interwork -ffunction-sections -fdata-sections \
-    -g -O1 -fno-common -fmessage-length=0 -specs=nosys.specs -specs=nano.specs")
+    -g  -fno-common -fmessage-length=0 -specs=nosys.specs -specs=nano.specs")
 
 SET(CMAKE_CXX_FLAGS_INIT "${COMMON_FLAGS} -std=c++11")
 SET(CMAKE_C_FLAGS_INIT "${COMMON_FLAGS} -std=gnu99")

@@ -14,6 +14,11 @@ void Power_USB_Enable(bool state);
 void Power_System_On(bool state);
 
 void Power_Battery_Task(Device_Status_t *Data);
+
+bool Power_Charger_Init(void);
+void Power_Charger_Task(ChargeChip_t *Data);
+
+
 void Power_Device_Off_On(Device_Status_t *Data);
 void Power_Off(void);
 

@@ -45,7 +45,6 @@ void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity){
         printf("BQ27441_enterConfig\n");
         BQ27441_setDesignEnergy(capacity);
         BQ27441_setCapacity(capacity);
-       // BQ27441_setTerminateVoltage(2600);
         if (BQ27441_exitConfig(true)){
             printf("BQ27441_exitConfig\n");
         } else
@@ -57,9 +56,23 @@ void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity){
 
 
 void Settings_Set_BQ27441_Set_Min_Liion_Volt(uint16_t volt){
+    bq2589x_set_bat_limit(volt);
     if (BQ27441_enterConfig(true)){
         printf("BQ27441_enterConfig\n");
-         BQ27441_setTerminateVoltage(volt);
+        BQ27441_setTerminateVoltageMin(volt);
+        if (BQ27441_exitConfig(true)){
+            printf("BQ27441_exitConfig\n");
+        } else
+            printf("BQ27441_exitConfig false\n");
+    } else
+        printf("BQ27441_enterConfig false\n");
+
+}
+
+void Settings_Set_BQ27441_Set_Max_Liion_Volt(uint16_t volt){
+    if (BQ27441_enterConfig(true)){
+        printf("BQ27441_enterConfig\n");
+        BQ27441_setTerminateVoltageMax(volt);
         if (BQ27441_exitConfig(true)){
             printf("BQ27441_exitConfig\n");
         } else

@@ -54,7 +54,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
-//#define USE_USB_DEBUG_PRINTF
+#define USE_USB_DEBUG_PRINTF
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/

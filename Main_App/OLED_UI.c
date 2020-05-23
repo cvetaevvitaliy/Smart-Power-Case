@@ -50,9 +50,16 @@ static void OLED_UI_Screen_Set_Capacity (Device_Status_t *Data);
 static void OLED_UI_Screen_Get_Info (Device_Status_t *Data);
 
 static void Draw_Work_Time (Device_Status_t *Data);
+static void Draw_Type_Charger(Device_Status_t *Data);
 
 
 void OLED_UI_Task(Device_Status_t *Data){
+
+    static bool calibrate = false;
+    if (Data->need_calibrate == true && calibrate == false) {
+        Current_Menu = Current_Screen_Set_Capacity;
+        calibrate = true;
+    }
 
     ssd1306_Clear();
 
@@ -158,6 +165,8 @@ static void OLED_UI_Print_Main_Screen(Device_Status_t *Data){
         if (counter_power_off > 8) {
             ssd1306_Draw_String("Power Off", 20, 10, &Font_8x10);
             ssd1306_UpdateScreen();
+            TIM2->ARR = 30000;
+            HAL_TIM_Base_Start_IT(&htim2);
             HAL_Delay(1000);
             Power_Off();
         }
@@ -275,14 +284,16 @@ static void OLED_UI_Print_Menu_Page_2(Device_Status_t *Data){
 }
 
 
-static void Draw_Battery(Device_Status_t *Data){
+static void Draw_Battery(Device_Status_t *Data) {
 
     uint16_t print_percent;
     static uint32_t blink_low = 0;
+    static uint32_t time_print_icon = 0;
     static bool print_low = false;
+    static bool print_icon_bat = true;
 
     ssd1306_SetColor(Black);
-    ssd1306_FillRect(2 + POSITION_BATTERY_X,2 + POSITION_BATTERY_Y ,21,8);
+    ssd1306_FillRect(2 + POSITION_BATTERY_X, 2 + POSITION_BATTERY_Y, 21, 8);
     ssd1306_SetColor(White);
 
 //    if (Data->Battery_Info.charge_flag == true){
@@ -290,7 +301,7 @@ static void Draw_Battery(Device_Status_t *Data){
 //        ssd1306_Draw_String(print_oled_string, POSITION_BATTERY_X, 1 + POSITION_BATTERY_Y, &Font_8x10);
 //    }
 
-    if (Data->Battery_Info.percent <= 5) {
+    if (Data->Battery_Info.percent <= 5 && Data->ChargeChip.charging_status == 0) {
         if (print_low == false) {
             print_low = true;
             blink_low = HAL_GetTick();
@@ -299,52 +310,65 @@ static void Draw_Battery(Device_Status_t *Data){
                 TIM2->ARR = 10000;
                 HAL_TIM_Base_Start_IT(&htim2);
             }
-        } else if (HAL_GetTick() - blink_low > 500 && print_low ) {
+        } else if (HAL_GetTick() - blink_low > 500 && print_low) {
             print_low = false;
             blink_low = HAL_GetTick();
             ssd1306_Draw_String("LOW", POSITION_BATTERY_X, 2 + POSITION_BATTERY_Y, &Font_8x10);
         }
     }
 
-    ssd1306_DrawHorizontalLine(1 + POSITION_BATTERY_X, 0 + POSITION_BATTERY_Y, 23 );
-    ssd1306_DrawHorizontalLine(1 + POSITION_BATTERY_X, 11 + POSITION_BATTERY_Y, 23 );
-    ssd1306_DrawVerticalLine(0 + POSITION_BATTERY_X,1 + POSITION_BATTERY_Y,10);
-    ssd1306_DrawVerticalLine(24 + POSITION_BATTERY_X,1 + POSITION_BATTERY_Y,10);
 
-    ssd1306_DrawRect(24 + POSITION_BATTERY_X,3 + POSITION_BATTERY_Y,3,6);
+    if (Data->ChargeChip.charging_status > 1 && Data->ChargeChip.charging_status < 3 && HAL_GetTick() - time_print_icon > 1000) {
+        print_icon_bat = false;
+        time_print_icon = HAL_GetTick();
+    }else
+        print_icon_bat = true;
 
-    print_percent = MinMax(Data->Battery_Info.percent,0,100,0,21);
-    ssd1306_FillRect(2 + POSITION_BATTERY_X,2 + POSITION_BATTERY_Y, print_percent,8);
+    if (print_icon_bat) {
+        /** battery icon **/
+        ssd1306_DrawHorizontalLine(1 + POSITION_BATTERY_X, 0 + POSITION_BATTERY_Y, 23);
+        ssd1306_DrawHorizontalLine(1 + POSITION_BATTERY_X, 11 + POSITION_BATTERY_Y, 23);
+        ssd1306_DrawVerticalLine(0 + POSITION_BATTERY_X, 1 + POSITION_BATTERY_Y, 10);
+        ssd1306_DrawVerticalLine(24 + POSITION_BATTERY_X, 1 + POSITION_BATTERY_Y, 10);
+
+        ssd1306_DrawRect(24 + POSITION_BATTERY_X, 3 + POSITION_BATTERY_Y, 3, 6);
+        /** battery icon finish  **/
+    }
+
+
+    print_percent = MinMax(Data->Battery_Info.percent, 0, 96, 0, 21);
+    ssd1306_FillRect(2 + POSITION_BATTERY_X, 2 + POSITION_BATTERY_Y, print_percent, 8);
+
 
 }
 
 
 static void OLED_UI_Main_Screen_1(Device_Status_t *Data){
 
-    ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Used_mAh);
+    ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Current_mAh_Ico);
     ssd1306_SetColor(Black);
     if (Data->Battery_Info.capacity < 10)
-        sprintf(print_oled_string, "    %d", Data->Battery_Info.capacity);
-    else if (Data->Battery_Info.capacity < 100)
         sprintf(print_oled_string, "   %d", Data->Battery_Info.capacity);
-    else if (Data->Battery_Info.capacity < 1000)
+    else if (Data->Battery_Info.capacity < 100)
         sprintf(print_oled_string, "  %d", Data->Battery_Info.capacity);
-    else
+    else if (Data->Battery_Info.capacity < 1000)
         sprintf(print_oled_string, " %d", Data->Battery_Info.capacity);
-    ssd1306_Draw_String(print_oled_string, 22, 3, &Font_8x10);
+    else
+        sprintf(print_oled_string, "%d", Data->Battery_Info.capacity);
+    ssd1306_Draw_String(print_oled_string, 30, 3, &Font_8x10);
 
     ssd1306_SetColor(White);
-    ssd1306_Draw_Bitmap_Mono(3, 18, &Image_Used_mAh);
+    ssd1306_Draw_Bitmap_Mono(3, 18, &Image_Full_mAh_Ico);
     ssd1306_SetColor(Black);
     if (Data->Battery_Info.capacity_full < 10)
-        sprintf(print_oled_string, "    %d", Data->Battery_Info.capacity_full);
-    else if (Data->Battery_Info.capacity_full < 100)
         sprintf(print_oled_string, "   %d", Data->Battery_Info.capacity_full);
-    else if (Data->Battery_Info.capacity_full < 1000)
+    else if (Data->Battery_Info.capacity_full < 100)
         sprintf(print_oled_string, "  %d", Data->Battery_Info.capacity_full);
-    else
+    else if (Data->Battery_Info.capacity_full < 1000)
         sprintf(print_oled_string, " %d", Data->Battery_Info.capacity_full);
-    ssd1306_Draw_String(print_oled_string, 22, 18, &Font_8x10);
+    else
+        sprintf(print_oled_string, "%d", Data->Battery_Info.capacity_full);
+    ssd1306_Draw_String(print_oled_string, 30, 18, &Font_8x10);
 
 //    ssd1306_SetColor(White);
 //    ssd1306_Draw_Bitmap_Mono(3, 18, &Image_Current_I);
@@ -356,9 +380,10 @@ static void OLED_UI_Main_Screen_1(Device_Status_t *Data){
 //    ssd1306_Draw_String(print_oled_string, 22, 18, &Font_8x10);
 
 
-    ssd1306_SetColor(White);
-    ssd1306_Draw_Bitmap_Mono(72, 3, &Image_Power_On_Time);
-    Draw_Work_Time(Data);
+    if (Data->ChargeChip.charging_status == 0)
+        Draw_Work_Time(Data);
+    else
+        Draw_Type_Charger(Data);
 
 }
 
@@ -437,11 +462,17 @@ static void OLED_UI_Screen_Set_Low_Volt (Device_Status_t *Data){
                 third_position = 0;
         }
         if (ptr == 3 ){
-            Current_Menu = Current_Screen_Menu_Page_1;
+
+            if (Data->need_calibrate)
+                Current_Menu = Current_Screen_Main_Progress;
+            else
+                Current_Menu = Current_Screen_Menu_Page_1;
+
             Data->Device_Settings.low_volt = (first_position * 100) + (second_position * 10) + third_position;
             Settings_Set(&Data->Device_Settings);
             Settings_Set_BQ27441_Set_Min_Liion_Volt(Data->Device_Settings.low_volt);
             ptr = 0;
+            Data->need_calibrate = false;
         }
     }
 
@@ -498,7 +529,7 @@ static void OLED_UI_Screen_Set_I_Max (Device_Status_t *Data) {
     if (Data->State_Button.Button_select_pushed ) {
         if ( ptr == 0 ) {
             set_I_max[0]++;
-            if (set_I_max[0] == 3)
+            if (set_I_max[0] == 4)
                 set_I_max[0] = 0;
         }
         if ( ptr == 1 ){
@@ -741,7 +772,7 @@ static void OLED_UI_Screen_Set_Capacity (Device_Status_t *Data){
     if (Data->State_Button.Button_select_pushed ) {
         if ( ptr == 0 ) {
             set_capacity[0]++;
-            if (set_capacity[0] == 7)
+            if (set_capacity[0] == 8)
                 set_capacity[0] = 0;
         }
         if ( ptr == 1 ){
@@ -760,7 +791,11 @@ static void OLED_UI_Screen_Set_Capacity (Device_Status_t *Data){
                 set_capacity[3] = 0;
         }
         if (ptr == 4 ){
-            Current_Menu = Current_Screen_Menu_Page_2;
+            if (Data->need_calibrate == true)
+                Current_Menu = Current_Screen_Low_Volt;
+            else
+                Current_Menu = Current_Screen_Menu_Page_2;
+
             Data->Device_Settings.design_capacity = (set_capacity[0] * 1000) + (set_capacity[1] * 100) + (set_capacity[2] * 10) + set_capacity[3];
             Settings_Set(&Data->Device_Settings);
             Settings_Set_BQ27441_Set_Capacity(Data->Device_Settings.design_capacity);
@@ -802,13 +837,24 @@ static void OLED_UI_Screen_Get_Info (Device_Status_t *Data){
     ssd1306_Draw_Bitmap_Mono(64, 5, &Image_Used_mAh);
     ssd1306_Draw_Bitmap_Mono(64, 18, &Image_Charge_Count_Ico);
 
-    if (Data->State_Button.Button_select_pushed )
+    sprintf(print_oled_string,"%.2fV", Data->Battery_Info.Vbat);
+    ssd1306_Draw_String(print_oled_string, 22, 6,&Font_8x10);
+    sprintf(print_oled_string,"%d", Data->Battery_Info.capacity);
+    ssd1306_Draw_String(print_oled_string, 84, 6,&Font_8x10);
+
+    sprintf(print_oled_string,"%d%%", Data->Battery_Info.health);
+    ssd1306_Draw_String(print_oled_string, 22, 19,&Font_8x10);
+
+
+    if (Data->State_Button.Button_select_pushed || Data->State_Button.Button_menu_pushed )
         Current_Menu = Current_Screen_Menu_Page_2;
 }
 
 
 static void Draw_Work_Time(Device_Status_t *Data){
 
+    ssd1306_SetColor(White);
+    ssd1306_Draw_Bitmap_Mono(72, 3, &Image_Power_On_Time);
     if (Data->work_time_second < 10){
         sprintf(print_oled_string, "%d:%d:0%d", Data->work_time_hours, Data->work_time_minute, Data->work_time_second);
         if (Data->work_time_minute < 10)
@@ -819,6 +865,27 @@ static void Draw_Work_Time(Device_Status_t *Data){
         sprintf(print_oled_string, "%d:%d:%d", Data->work_time_hours, Data->work_time_minute, Data->work_time_second);
 
     ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X, POSITION_WORK_TIME_Y, &Font_8x10);
+
+}
+
+
+static void Draw_Type_Charger(Device_Status_t *Data){
+    ssd1306_SetColor(White);
+
+    if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP)
+        ssd1306_Draw_Bitmap_Mono(72, 3, &Image_USB_Ico);
+    else if ( Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_DCP)
+        ssd1306_Draw_Bitmap_Mono(72, 3, &Image_5V_Ico);
+    else if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_MAXC)
+        ssd1306_Draw_Bitmap_Mono(72, 3, &Image_QC_Ico);
+    else if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_UNKNOWN || Data->ChargeChip.vbus_type == BQ2589X_VBUS_NONSTAND)
+        ssd1306_Draw_Bitmap_Mono(72, 3, &Image_Err_Ico);
+
+    sprintf(print_oled_string, " %.1fV", (float )(Data->ChargeChip.Vbus/1000.0));
+    if (Data->ChargeChip.Vbus > 10000)
+        ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X, POSITION_WORK_TIME_Y, &Font_8x10);
+    else
+        ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X + 5, POSITION_WORK_TIME_Y, &Font_8x10);
 
 }
 

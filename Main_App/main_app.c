@@ -17,10 +17,12 @@ uint32_t time_delay = 0;
 
 extern DMA_HandleTypeDef hdma_adc1;
 extern I2C_HandleTypeDef hi2c1;
+extern RTC_HandleTypeDef hrtc;
 
 static Device_Status_t Device_Status = {0};
 
 static void Time_Task(Device_Status_t *Data);
+static void Need_Reset(Device_Status_t *Data);
 
 void App_Setup(void){
 #ifdef USE_USB_DEBUG_PRINTF
@@ -29,26 +31,42 @@ void App_Setup(void){
     //Settings_Set_Default(&Device_Status.Device_Settings);
     Settings_Get(&Device_Status.Device_Settings);
     //Settings_Set_BQ27441();
+    //Settings_Set_Default(&Device_Status.Device_Settings);
 }
 
 void App_Init(void){
 
+    if (Power_Charger_Init() == false){
+        Device_Status.Device_Error = Device_Error_BQ25895;
+        Device_Status.system_critical_error = true;
+#ifdef USE_USB_DEBUG_PRINTF
+        printf("ADC BQ25895\n");
+#endif
+    }
+
     if (ADC_Init() == false){
         Device_Status.Device_Error = Device_Error_ADC;
         Device_Status.system_critical_error = true;
+#ifdef USE_USB_DEBUG_PRINTF
         printf("ADC Error\n");
+#endif
     }
     if (BQ27441_init() == false) {
         Device_Status.Device_Error = Device_Error_BQ27441;
         Device_Status.system_critical_error = true;
+#ifdef USE_USB_DEBUG_PRINTF
         printf("BQ27441 not found\n");
+#endif
     }
 
     Power_OLED_On(true);
+    Power_Boost_Enable(true);
     if (ssd1306_Init() == false) {
         Device_Status.Device_Error = Device_Error_SSD1306;
         Device_Status.system_critical_error = true;
+#ifdef USE_USB_DEBUG_PRINTF
         printf("ssd1306 not found\n");
+#endif
         Power_OLED_On(false);
         Power_System_On(false);
         Power_Boost_Enable(false);
@@ -65,11 +83,13 @@ void App_Init(void){
 void App_Check_StartUp(void){
 
     if (Device_Status.system_critical_error == true){
+#ifdef USE_USB_DEBUG_PRINTF
         printf("Error %d\n", Device_Status.Device_Error);
+#endif
         ssd1306_Draw_String("Error System", 0, 0, &Font_8x10);
         ssd1306_Draw_String(print_error[Device_Status.Device_Error], 0, 10, &Font_8x10);
         ssd1306_UpdateScreen();
-        HAL_Delay(200);
+        HAL_Delay(2000);
         ssd1306_Clear();
     } else {
         Power_System_On(true);
@@ -79,19 +99,41 @@ void App_Check_StartUp(void){
         else
             Power_Boost_Enable_12V(false);
     }
+    if (HAL_RTCEx_BKUPRead(&hrtc,1) == 0) {
+        ssd1306_Draw_String("Find NEW BAT", 0, 0, &Font_8x10);
+        ssd1306_Draw_String("Please", 0, 10, &Font_8x10);
+        ssd1306_Draw_String("Recalibrate", 0, 20, &Font_8x10);
+        ssd1306_UpdateScreen();
+        Settings_Set_BQ27441_Set_Max_Liion_Volt(4145);
+        Settings_Set_BQ27441_Set_Min_Liion_Volt(2900);
+        BQ27441_setTaperRateVoltage(4100);
+        //Settings_Set_BQ27441_Set_Capacity(6000);
+        Device_Status.need_calibrate = true;
+        HAL_RTCEx_BKUPWrite(&hrtc,1,1);
+        HAL_Delay(2000);
+    } else {
+        Device_Status.need_calibrate = false;
+        Settings_Set_BQ27441_Set_Max_Liion_Volt(4145);
+        Settings_Set_BQ27441_Set_Min_Liion_Volt(Device_Status.Device_Settings.low_volt);
+        //BQ27441_setTaperRateVoltage(4150);
+    }
 
 }
 
 
 void App_Loop(void){
 
-   // clrscr();
+   clrscr();
 
     Time_Task(&Device_Status);
     ADC_Task(&Device_Status.ADC_Data);
     Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings);
     OLED_UI_Task(&Device_Status);
     Power_Battery_Task(&Device_Status);
+    Power_Charger_Task(&Device_Status.ChargeChip);
+
+    Need_Reset(&Device_Status);
+
 
 }
 
@@ -113,4 +155,11 @@ static void Time_Task(Device_Status_t *Data){
             }
         }
     }
+}
+
+static void Need_Reset(Device_Status_t *Data){
+
+    if (HAL_GPIO_ReadPin (Button1_GPIO_Port, Button1_Pin) && HAL_GPIO_ReadPin (Button2_GPIO_Port, Button2_Pin))
+         if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP )
+            NVIC_SystemReset();
 }
