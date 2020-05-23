@@ -73,5 +73,12 @@ extern const tImage Image_Battery_Life_Ico;
 extern const tImage Image_Battery_Type_Ico;
 extern const tImage Image_Charge_Count_Ico;
 
+extern const tImage Image_USB_Ico;
+extern const tImage Image_5V_Ico;
+extern const tImage Image_QC_Ico;
+extern const tImage Image_Err_Ico;
+extern const tImage Image_Current_mAh_Ico;
+extern const tImage Image_Full_mAh_Ico;
+
 #endif
 

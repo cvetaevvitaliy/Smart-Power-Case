@@ -63,7 +63,7 @@ static uint8_t constrain(const uint8_t x, const uint8_t a, const uint8_t b);
     @return true if communication was successful.
 */
 bool BQ27441_init(void) {
-    if (HAL_I2C_IsDeviceReady(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), 5, 20) != HAL_OK)
+    if (HAL_I2C_IsDeviceReady(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), 5, 50) != HAL_OK)
         return false;
 
     if (BQ27441_deviceType() == BQ27441_DEVICE_ID) { // Read deviceType from BQ27441
@@ -143,7 +143,7 @@ bool BQ27441_setTerminateVoltageMax(uint16_t voltage){
 }
 
 // Configures taper rate of connected battery.
-bool BQ27441_setTaperRate(uint16_t rate) {
+bool BQ27441_setTaperRateTime(uint16_t rate) {
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x1B (27)
     // Termiante voltage is a 2-byte piece of data - MSB first
@@ -154,6 +154,19 @@ bool BQ27441_setTaperRate(uint16_t rate) {
     uint8_t trLSB = rate & 0x00FF;
     uint8_t trData[2] = {trMSB, trLSB};
     return BQ27441_writeExtendedData(BQ27441_ID_STATE, 27, trData, 2);
+}
+
+bool BQ27441_setTaperRateVoltage(uint16_t voltage) {
+    // Write to STATE subclass (82) of BQ27441 extended memory.
+    // Offset 0x1B (27)
+    // Termiante voltage is a 2-byte piece of data - MSB first
+    // Unit: 0.1h
+    // Max 2000
+    if (voltage > 5000) voltage = 5000;
+    uint8_t trMSB = voltage >> 8;
+    uint8_t trLSB = voltage & 0x00FF;
+    uint8_t trData[2] = {trMSB, trLSB};
+    return BQ27441_writeExtendedData(BQ27441_ID_STATE, 29, trData, 2);
 }
 
 /*****************************************************************************

@@ -56,6 +56,7 @@ void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity){
 
 
 void Settings_Set_BQ27441_Set_Min_Liion_Volt(uint16_t volt){
+    bq2589x_set_bat_limit(volt);
     if (BQ27441_enterConfig(true)){
         printf("BQ27441_enterConfig\n");
         BQ27441_setTerminateVoltageMin(volt);

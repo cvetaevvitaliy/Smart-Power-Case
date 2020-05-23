@@ -134,8 +134,9 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 #ifdef USE_USB_DEBUG_PRINTF
-  USB_Reset_GPIO();
-  MX_USB_DEVICE_Init();
+//  USB_Reset_GPIO();
+//  HAL_Delay(1000);
+//  MX_USB_DEVICE_Init();
 #endif
   DWT_Delay_Init();
   App_Setup();
@@ -144,7 +145,7 @@ int main(void)
   //HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
   //TIM1->CR1 |= TIM_CR1_OPM;
   HAL_TIM_Base_Start_IT(&htim2);
-  /* USER CODE END 2 */
+  /* USER CODE END 2 *
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -547,6 +548,7 @@ void _Error_Handler(char *file, int line)
   /* User can add his own implementation to report the HAL error return state */
   while(1)
   {
+    NVIC_SystemReset();
   }
   /* USER CODE END Error_Handler_Debug */
 }
