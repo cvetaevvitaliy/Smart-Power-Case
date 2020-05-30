@@ -12,6 +12,9 @@ https://www.youtube.com/watch?v=4TmXY8NL-vo
 <br>
 Download [Gerber X2.zip](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/GerberX2_V2_2.zip)
 
+Download STL for 3D printing <br>
+MID https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/STL_File/mid.STL<br>
+TOP https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/STL_File/top.STL<br>
 
 ![TOP](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/2020-05-30_23-37-36.png)
 
@@ -32,3 +35,6 @@ Download [Gerber X2.zip](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob
 ![BOT](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/IMG_5686.jpeg)
 
 
+![SolidWorks](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/2020-05-31_0-51-28.png)
+![SolidWorks](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/2020-05-31_0-50-00.png)
+![SolidWorks](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/2020-05-31_0-50-51.png)
