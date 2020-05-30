@@ -1,4 +1,4 @@
-# Smart-Power-Case
+# Smart Power Case for FatShark 
 Smart Power Case for FatShark goggles <br>
 Powered by a single Li-ion, stable output 8.2V or 12.6V (switching from menu)<br>
 Support QC 2.0/3.0, FastCharge charges 5V, 9V, 12V - max input 18W<br>
