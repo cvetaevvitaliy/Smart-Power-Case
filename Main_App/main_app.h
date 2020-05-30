@@ -12,6 +12,9 @@
 #endif
 #include "ssd1306.h"
 #include "stdbool.h"
+#include "BQ27441.h"
+#include "bq2589x_charger.h"
+
 
 typedef enum {
     Boost_8V = 0,
@@ -33,6 +36,7 @@ typedef enum {
     Device_Error_BQ27441,
     Device_Error_SSD1306,
     Device_Error_ADC,
+    Device_Error_BQ25895,
     Device_Error_Temp,
     Device_Error_Batt,
     Device_Error_Booster,
@@ -50,13 +54,21 @@ typedef struct {
     float Vbus;
     float Vout;
     float temperature;
-    uint16_t percent;
 
 }ADC_Voltage_Data_t;
 
 typedef struct {
     float Vbat;
     uint16_t percent;
+    uint16_t percent_unfiltered;
+    int16_t current;
+    int16_t power;
+    uint16_t capacity;
+    uint16_t capacity_full;
+    float temperature;
+    uint16_t time_to_empty;
+    bool charge_flag;
+    uint8_t health;
 
 }Battery_Status_t;
 
@@ -71,15 +83,32 @@ typedef struct {
 }Device_Settings_t;
 
 typedef struct {
+    bool chip_sleep;
+    bool charge_done;
+    bool usb_detect;
+    uint16_t charging_status;
+    uint16_t Vbus;
+    uint16_t Vbat;
+    uint16_t Vsys;
+    int16_t temp;
+    bq2589x_vbus_type vbus_type;
+
+}ChargeChip_t;
+
+typedef struct {
     Device_Settings_t Device_Settings;
     ADC_Voltage_Data_t ADC_Data;
     Battery_Status_t Battery_Info;
     Button_t State_Button;
     Device_Error_e Device_Error;
+    ChargeChip_t ChargeChip;
     uint8_t work_time_minute;
     uint8_t work_time_second;
     uint8_t work_time_hours;
     bool system_critical_error;
+    bool hiz_mode;
+    bool need_calibrate;
+    bool usb_detect;
 }Device_Status_t;
 
 
