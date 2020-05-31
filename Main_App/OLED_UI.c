@@ -336,7 +336,7 @@ static void Draw_Battery(Device_Status_t *Data) {
     }
 
 
-    print_percent = MinMax(Data->Battery_Info.percent, 0, 96, 0, 21);
+    print_percent = MinMax(Data->Battery_Info.percent, 0, 91, 0, 21);
     ssd1306_FillRect(2 + POSITION_BATTERY_X, 2 + POSITION_BATTERY_Y, print_percent, 8);
 
 

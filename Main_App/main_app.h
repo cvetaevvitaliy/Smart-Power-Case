@@ -69,6 +69,9 @@ typedef struct {
     uint16_t time_to_empty;
     bool charge_flag;
     uint8_t health;
+    bool fast_charge;
+    bool charge_detect;
+    bool battery_discharging;
 
 }Battery_Status_t;
 
