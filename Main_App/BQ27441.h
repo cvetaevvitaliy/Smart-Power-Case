@@ -111,4 +111,6 @@ bool BQ27441_exitConfig (bool resim);
 uint16_t BQ27441_flags (void);
 uint16_t BQ27441_status (void);
 
+void BQ27441_Full_Reset(void);
+
 #endif //FATSHARK_POWER_V1_BQ27441_H

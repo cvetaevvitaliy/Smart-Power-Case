@@ -61,7 +61,7 @@
 #include "usbd_def.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+void MX_USB_DEVICE_DeInit(void);
 /* USER CODE END INCLUDE */
 
 /** @addtogroup USBD_OTG_DRIVER

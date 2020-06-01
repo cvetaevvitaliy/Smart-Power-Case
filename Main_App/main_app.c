@@ -7,13 +7,7 @@
 #include "button.h"
 #include "Power.h"
 #include "Settings_Eeprom.h"
-#include "HDQ.h"
-
-#define CHECK_MIN_VOUT_8V                 7
-
-uint8_t BYT1, BYT2;
-int dev, firm, hard, major, minor;
-uint32_t time_delay = 0;
+#include "Debug.h"
 
 extern DMA_HandleTypeDef hdma_adc1;
 extern I2C_HandleTypeDef hi2c1;
@@ -25,13 +19,12 @@ static void Time_Task(Device_Status_t *Data);
 static void Need_Reset(Device_Status_t *Data);
 
 void App_Setup(void){
-#ifdef USE_USB_DEBUG_PRINTF
-    HAL_Delay(200);  /// need this time for reset and reinit USB
-#endif
+
     //Settings_Set_Default(&Device_Status.Device_Settings);
     Settings_Get(&Device_Status.Device_Settings);
-    //Settings_Set_BQ27441();
-    //Settings_Set_Default(&Device_Status.Device_Settings);
+    if (Device_Status.Device_Settings.low_volt == 0xFFFF) {
+        Settings_Set_Default(&Device_Status.Device_Settings);
+    }
 }
 
 void App_Init(void){
@@ -73,8 +66,9 @@ void App_Init(void){
     } else {
         //ssd1306_InvertDisplay();
         ssd1306_Draw_String("System Init", 20, 10, &Font_8x10);
+        ssd1306_Draw_String(SOFTWARE_VERSION, 40, 20,&Font_8x10);
         ssd1306_UpdateScreen();
-        HAL_Delay(500);
+        HAL_Delay(1500);
         ssd1306_Clear();
     }
 
@@ -121,14 +115,15 @@ void App_Check_StartUp(void){
 
 void App_Loop(void){
 
-   clrscr();
-
     Time_Task(&Device_Status);
     ADC_Task(&Device_Status.ADC_Data);
     Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings);
     OLED_UI_Task(&Device_Status);
     Power_Battery_Task(&Device_Status);
     Power_Charger_Task(&Device_Status.ChargeChip);
+#ifdef USE_USB_DEBUG_PRINTF
+    Debug_Task(&Device_Status);
+#endif
 
     Need_Reset(&Device_Status);
 
@@ -157,7 +152,20 @@ static void Time_Task(Device_Status_t *Data){
 
 static void Need_Reset(Device_Status_t *Data){
 
-    if (HAL_GPIO_ReadPin (Button1_GPIO_Port, Button1_Pin) && HAL_GPIO_ReadPin (Button2_GPIO_Port, Button2_Pin))
-         if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP )
-            NVIC_SystemReset();
+    if (HAL_GPIO_ReadPin (Button1_GPIO_Port, Button1_Pin) && HAL_GPIO_ReadPin (Button2_GPIO_Port, Button2_Pin)) {
+        if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP ) {
+            ssd1306_Clear();
+            ssd1306_Draw_String("DFU 3.0", 30, 10, &Font_8x10);
+            ssd1306_UpdateScreen();
+            uint16_t data = 0x424C;
+            HAL_RTCEx_BKUPWrite(&hrtc, 4, (uint32_t) data);
+            HAL_Delay(1000);
+        }
+       // SET_BIT(PWR->CR, PWR_CR_DBP);
+        //WRITE_REG(BKP->DR4, 0x424C);
+        //CLEAR_BIT(PWR->CR, PWR_CR_DBP);
+       // HAL_Delay(1000);
+        //if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP )
+        NVIC_SystemReset();
+    }
 }

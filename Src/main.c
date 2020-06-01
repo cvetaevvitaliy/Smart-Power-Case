@@ -133,11 +133,6 @@ int main(void)
   MX_TIM2_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-#ifdef USE_USB_DEBUG_PRINTF
-//  USB_Reset_GPIO();
-//  HAL_Delay(1000);
-//  MX_USB_DEVICE_Init();
-#endif
   DWT_Delay_Init();
   App_Setup();
   App_Init();

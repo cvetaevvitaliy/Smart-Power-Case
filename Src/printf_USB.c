@@ -5,10 +5,14 @@
 
 #ifdef USE_USB_DEBUG_PRINTF
 
+static bool usb_detect = false;
 
 int _write(int file,char *ptr, int len)
 {
-   (CDC_Transmit_FS((uint8_t*)ptr, len));
+    if (usb_detect) {
+        CDC_Transmit_FS((uint8_t *) ptr, len);
+        HAL_Delay(5);
+    }
    return len;
 
 }
@@ -16,6 +20,11 @@ int _write(int file,char *ptr, int len)
 void clrscr(void){
     printf("\033[2J"); /* Clear the entire screen. */
     printf("\033[0;0f"); /* Move cursor to the top left hand corner */
+}
+
+void Enable_USB_Debug(bool enable){
+    usb_detect = enable;
+
 }
 
 #endif
