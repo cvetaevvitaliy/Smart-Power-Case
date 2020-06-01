@@ -26,7 +26,6 @@ TOP https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/STL_File/t
 
 ![BOT](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/IMG_5678.jpeg)
 
-
 ![BOT](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/IMG_5679.jpeg)
 
 ![BOT](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/IMG_5680.jpeg)
@@ -39,3 +38,7 @@ TOP https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/STL_File/t
 ![SolidWorks](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/2020-05-31_0-51-28.png)
 ![SolidWorks](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/2020-05-31_0-50-00.png)
 ![SolidWorks](https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/2020-05-31_0-50-51.png)
+
+See 3D model in the browser <br>
+MID https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/STL_File/mid.STL<br>
+TOP https://github.com/cvetaevvitaliy/Smart-Power-Case/blob/master/HW/STL_File/top.STL<br>
