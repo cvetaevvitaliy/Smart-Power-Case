@@ -3,6 +3,7 @@ Smart Power Case for FatShark goggles <br>
 Powered by a single Li-ion, stable output 8.2V or 12.6V (switching from menu)<br>
 Support QC 2.0/3.0, FastCharge charges 5V, 9V, 12V - max input 18W<br>
 Shows operating time, remaining battery capacity, remaining charging time (use fuel gauge chip BQ27441)<br>
+add support fw update from bootloader, use HID bootloader (https://github.com/cvetaevvitaliy/STM32_HID_Bootloader)<br>
 
 YouTube link <br>https://www.youtube.com/watch?v=Y0oo7hjzqtc <br>
 https://www.youtube.com/watch?v=4TmXY8NL-vo
