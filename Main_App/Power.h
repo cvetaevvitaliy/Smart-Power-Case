@@ -11,6 +11,7 @@ void Power_OLED_On(bool state);
 void Power_Boost_Enable(bool state);
 void Power_Boost_Enable_12V(bool state);
 void Power_USB_Enable(bool state);
+void Power_USB_Reset_GPIO(void );
 void Power_System_On(bool state);
 
 void Power_Battery_Task(Device_Status_t *Data);

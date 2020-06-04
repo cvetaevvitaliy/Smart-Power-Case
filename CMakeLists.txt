@@ -3,6 +3,14 @@ SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.7)
 
+set(VERSION_RELEASE 1)
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 1)
+set(VERSIONFW "${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}")
+
+add_definitions(-DSOFTWARE_VERSION=\"${VERSIONFW}\")
+add_definitions(-DUSE_USB_DEBUG_PRINTF)
+
 # specify cross compilers and tools
 SET(CMAKE_C_COMPILER_WORKS 1)
 SET(CMAKE_C_COMPILER arm-none-eabi-gcc)

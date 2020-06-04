@@ -44,6 +44,22 @@ void Power_USB_Enable(bool state){
 
 }
 
+void Power_USB_Reset_GPIO(void){
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    GPIO_InitStruct.Pin = GPIO_PIN_12;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    HAL_GPIO_WritePin(GPIOA,GPIO_PIN_12,GPIO_PIN_RESET);
+
+    HAL_Delay(100);
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_12);
+
+}
+
 
 void Power_System_On(bool state){
 
@@ -67,6 +83,7 @@ void Power_Battery_Task(Device_Status_t *Data){
         Data->Battery_Info.temperature = BQ27441_temperature(BATTERY) / 100.0;
         Data->Battery_Info.capacity = BQ27441_capacity(REMAIN);
         Data->Battery_Info.capacity_full = BQ27441_capacity(FULL);
+        Data->Battery_Info.design_capacity = BQ27441_capacity(DESIGN);
         Data->Battery_Info.Vbat = BQ27441_voltage() / 1000.0;
         Data->Battery_Info.percent = BQ27441_soc(FILTERED);
         Data->Battery_Info.percent_unfiltered = BQ27441_soc(UNFILTERED);
@@ -76,6 +93,7 @@ void Power_Battery_Task(Device_Status_t *Data){
         Data->Battery_Info.charge_detect = BQ27441_fcFlag();
         Data->Battery_Info.fast_charge = BQ27441_chgFlag();
         Data->Battery_Info.battery_discharging = BQ27441_dsgFlag();
+
 
         if (Data->ADC_Data.Vbus > 3.5)
             Data->Battery_Info.charge_flag = true;
@@ -179,6 +197,7 @@ bool Power_Charger_Init(void){
 void Power_Charger_Task(ChargeChip_t *Data){
 
     static uint32_t time_delay_task = 0;
+    static bool usb_enable = false;
 
     if (HAL_GetTick() - time_delay_task > 500) {
 
@@ -187,16 +206,29 @@ void Power_Charger_Task(ChargeChip_t *Data){
         Data->vbus_type = bq2589x_get_vbus_type();
         Data->charge_done = bq2589x_is_charge_done();
         Data->charging_status = bq2589x_get_charging_status();
-        
-//        if (Data->vbus_type == BQ2589X_VBUS_USB_SDP && Data->usb_detect == false) {
-//            Power_USB_Enable(true);
-//            Data->usb_detect = true;
-//            MX_USB_DEVICE_Init();
-//        } else if (Data->vbus_type == BQ2589X_VBUS_NONE && Data->usb_detect == true) {
-//            Data->usb_detect = false;
-//            Power_USB_Enable(false);
-//        }
 
+#ifdef USE_USB_DEBUG_PRINTF
+
+        if (Data->vbus_type == BQ2589X_VBUS_USB_SDP  || Data->vbus_type == BQ2589X_VBUS_USB_CDP) {
+            if (usb_enable == false) {
+                usb_enable = true;
+                Enable_USB_Debug(true);
+                Power_USB_Reset_GPIO();
+                Power_USB_Enable(true);
+                HAL_Delay(200);
+                MX_USB_DEVICE_Init();
+                HAL_Delay(200);  /// need this time for reset and reinit USB
+            }
+        }
+
+        if (Data->vbus_type == BQ2589X_VBUS_NONE && usb_enable == true) {
+            Power_USB_Enable(false);
+            MX_USB_DEVICE_DeInit();
+            usb_enable = false;
+            Enable_USB_Debug(false);
+            HAL_Delay(200);
+        }
+#endif
 
 
         time_delay_task = HAL_GetTick();
