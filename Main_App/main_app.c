@@ -9,12 +9,6 @@
 #include "Settings_Eeprom.h"
 #include "HDQ.h"
 
-#define CHECK_MIN_VOUT_8V                 7
-
-uint8_t BYT1, BYT2;
-int dev, firm, hard, major, minor;
-uint32_t time_delay = 0;
-
 extern DMA_HandleTypeDef hdma_adc1;
 extern I2C_HandleTypeDef hi2c1;
 extern RTC_HandleTypeDef hrtc;
@@ -30,8 +24,9 @@ void App_Setup(void){
 #endif
     //Settings_Set_Default(&Device_Status.Device_Settings);
     Settings_Get(&Device_Status.Device_Settings);
-    //Settings_Set_BQ27441();
-    //Settings_Set_Default(&Device_Status.Device_Settings);
+    if (Device_Status.Device_Settings.low_volt == 0xFFFF) {
+        Settings_Set_Default(&Device_Status.Device_Settings);
+    }
 }
 
 void App_Init(void){
@@ -157,7 +152,20 @@ static void Time_Task(Device_Status_t *Data){
 
 static void Need_Reset(Device_Status_t *Data){
 
-    if (HAL_GPIO_ReadPin (Button1_GPIO_Port, Button1_Pin) && HAL_GPIO_ReadPin (Button2_GPIO_Port, Button2_Pin))
-         if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP )
-            NVIC_SystemReset();
+    if (HAL_GPIO_ReadPin (Button1_GPIO_Port, Button1_Pin) && HAL_GPIO_ReadPin (Button2_GPIO_Port, Button2_Pin)) {
+        if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP ) {
+            ssd1306_Clear();
+            ssd1306_Draw_String("DFU 3.0", 30, 10, &Font_8x10);
+            ssd1306_UpdateScreen();
+            uint16_t data = 0x424C;
+            HAL_RTCEx_BKUPWrite(&hrtc, 4, (uint32_t) data);
+            HAL_Delay(1000);
+        }
+       // SET_BIT(PWR->CR, PWR_CR_DBP);
+        //WRITE_REG(BKP->DR4, 0x424C);
+        //CLEAR_BIT(PWR->CR, PWR_CR_DBP);
+       // HAL_Delay(1000);
+        //if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP )
+        NVIC_SystemReset();
+    }
 }
