@@ -7,7 +7,7 @@
 #include "button.h"
 #include "Power.h"
 #include "Settings_Eeprom.h"
-#include "HDQ.h"
+#include "Debug.h"
 
 extern DMA_HandleTypeDef hdma_adc1;
 extern I2C_HandleTypeDef hi2c1;
@@ -19,9 +19,7 @@ static void Time_Task(Device_Status_t *Data);
 static void Need_Reset(Device_Status_t *Data);
 
 void App_Setup(void){
-#ifdef USE_USB_DEBUG_PRINTF
-    HAL_Delay(200);  /// need this time for reset and reinit USB
-#endif
+
     //Settings_Set_Default(&Device_Status.Device_Settings);
     Settings_Get(&Device_Status.Device_Settings);
     if (Device_Status.Device_Settings.low_volt == 0xFFFF) {
@@ -68,8 +66,9 @@ void App_Init(void){
     } else {
         //ssd1306_InvertDisplay();
         ssd1306_Draw_String("System Init", 20, 10, &Font_8x10);
+        ssd1306_Draw_String(SOFTWARE_VERSION, 40, 20,&Font_8x10);
         ssd1306_UpdateScreen();
-        HAL_Delay(500);
+        HAL_Delay(1500);
         ssd1306_Clear();
     }
 
@@ -116,14 +115,15 @@ void App_Check_StartUp(void){
 
 void App_Loop(void){
 
-   clrscr();
-
     Time_Task(&Device_Status);
     ADC_Task(&Device_Status.ADC_Data);
     Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings);
     OLED_UI_Task(&Device_Status);
     Power_Battery_Task(&Device_Status);
     Power_Charger_Task(&Device_Status.ChargeChip);
+#ifdef USE_USB_DEBUG_PRINTF
+    Debug_Task(&Device_Status);
+#endif
 
     Need_Reset(&Device_Status);
 

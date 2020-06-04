@@ -727,6 +727,13 @@ bool BQ27441_softReset(void) {
     return BQ27441_executeControlWord(BQ27441_CONTROL_SOFT_RESET);
 }
 
+void BQ27441_Full_Reset(void) {
+    BQ27441_enterConfig(true);
+    BQ27441_executeControlWord(BQ27441_CONTROL_RESET);
+    BQ27441_exitConfig(false);
+
+}
+
 /**
     Read a 16-bit command word from the BQ27441-G1A
 

@@ -65,6 +65,7 @@ typedef struct {
     int16_t power;
     uint16_t capacity;
     uint16_t capacity_full;
+    uint16_t design_capacity;
     float temperature;
     uint16_t time_to_empty;
     bool charge_flag;
