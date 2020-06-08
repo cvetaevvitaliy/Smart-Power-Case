@@ -54,7 +54,6 @@ void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity){
         BQ27441_setCapacity(capacity);
         BQ27441_setDesignEnergy((uint16_t)(capacity * 3.8f));
         BQ27441_setTaperRateTime(capacity / 22);
-
         BQ27441_setTerminateVoltageMin(3000);
         BQ27441_setChargeTermination(4135);
         BQ27441_setTaperRateVoltage(4130);
