@@ -90,9 +90,9 @@ bool BQ27441_setCapacity(uint16_t capacity) {
     return BQ27441_writeExtendedData(BQ27441_ID_STATE, 10, capacityData, 2);
 }
 
+
 /**
     Configures the Hibernate I the gauge enters HIBERNATE mode.
-
     @param mA (unsigned 16-bit value)
     @return true if capacity successfully set.
 */
@@ -350,6 +350,25 @@ bool BQ27441_GPOUTPolarity(void) {
     return (opConfigRegister & BQ27441_OPCONFIG_GPIOPOL);
 }
 
+bool BQ27441_setSLEEPenable(bool enable) {
+    uint16_t oldOpConfig = BQ27441_opConfig();
+
+    // Check to see if we need to update opConfig:
+    if ((enable && (oldOpConfig & BQ27441_OPCONFIG_GPIOPOL)) ||
+        (!enable && !(oldOpConfig & BQ27441_OPCONFIG_GPIOPOL)))
+        return true;
+
+    uint16_t newOpConfig = oldOpConfig;
+    if (enable)
+        newOpConfig |= BQ27441_OPCONFIG_SLEEP;
+    else
+        newOpConfig &= ~(BQ27441_OPCONFIG_SLEEP);
+
+    return BQ27441_writeOpConfig(newOpConfig);
+}
+
+
+
 /**
     Set GPOUT polarity to active-high or active-low
 
@@ -373,22 +392,7 @@ bool BQ27441_setGPOUTPolarity(bool activeHigh) {
     return BQ27441_writeOpConfig(newOpConfig);
 }
 
-bool BQ27441_setSLEEPenable(bool enable) {
-    uint16_t oldOpConfig = BQ27441_opConfig();
 
-    // Check to see if we need to update opConfig:
-    if ((enable && (oldOpConfig & BQ27441_OPCONFIG_GPIOPOL)) ||
-        (!enable && !(oldOpConfig & BQ27441_OPCONFIG_GPIOPOL)))
-        return true;
-
-    uint16_t newOpConfig = oldOpConfig;
-    if (enable)
-        newOpConfig |= BQ27441_OPCONFIG_SLEEP;
-    else
-        newOpConfig &= ~(BQ27441_OPCONFIG_SLEEP);
-
-    return BQ27441_writeOpConfig(newOpConfig);
-}
 
 /**
     Get GPOUT function (BAT_LOW or SOC_INT)
