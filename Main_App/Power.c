@@ -187,7 +187,7 @@ bool Power_Charger_Init(void){
         bq2589x_set_prechg_current(2048);
         bq2589x_set_bat_limit(2800);
         bq2589x_set_chargevoltage(4140);
-        bq2589x_set_term_current(218);
+        bq2589x_set_term_current(150);
         //bq2589x_set_IR_compensation_resistor(1);
         bq2589x_enable_max_charge(true);
         bq2589x_enable_charger();

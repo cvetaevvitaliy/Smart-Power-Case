@@ -167,6 +167,6 @@ static void Need_Reset(Device_Status_t *Data){
         //CLEAR_BIT(PWR->CR, PWR_CR_DBP);
        // HAL_Delay(1000);
         //if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP )
-        NVIC_SystemReset();
+        //NVIC_SystemReset();
     }
 }
