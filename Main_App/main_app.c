@@ -103,11 +103,12 @@ void App_Check_StartUp(void){
         //BQ27441_setTaperRateVoltage(4100);
         //Settings_Set_BQ27441_Set_Capacity(6000);
         Device_Status.need_calibrate = true;
-        HAL_RTCEx_BKUPWrite(&hrtc,1,1);
+        //HAL_RTCEx_BKUPWrite(&hrtc,1,1);
         HAL_Delay(2000);
     } else {
         Device_Status.need_calibrate = false;
-       // Settings_Set_BQ27441_Set_Min_Liion_Volt(Device_Status.Device_Settings.low_volt);
+        BQ27441_CLEAR_HIBERNATE();
+        //Settings_Set_BQ27441_Set_Min_Liion_Volt(Device_Status.Device_Settings.low_volt);
     }
 
 }
