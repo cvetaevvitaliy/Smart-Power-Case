@@ -90,6 +90,23 @@ bool BQ27441_setCapacity(uint16_t capacity) {
     return BQ27441_writeExtendedData(BQ27441_ID_STATE, 10, capacityData, 2);
 }
 
+
+/**
+    Configures the Hibernate I the gauge enters HIBERNATE mode.
+    @param mA (unsigned 16-bit value)
+    @return true if capacity successfully set.
+*/
+bool BQ27441_setHibernateCurrent(uint16_t current_mA) {
+    // Write to STATE subclass (68) of BQ27441 extended memory.
+    // Offset 0x07 (7)
+    // Hibernate I is a 2-byte piece of data - MSB first
+    // Unit: mA
+    uint8_t capMSB = current_mA >> 8;
+    uint8_t capLSB = current_mA & 0x00FF;
+    uint8_t current_mA_Data[2] = {capMSB, capLSB};
+    return BQ27441_writeExtendedData(BQ27441_ID_POWER, 7, current_mA_Data, 2);
+}
+
 /**
     Configures the design energy of the connected battery.
 
@@ -333,6 +350,25 @@ bool BQ27441_GPOUTPolarity(void) {
     return (opConfigRegister & BQ27441_OPCONFIG_GPIOPOL);
 }
 
+bool BQ27441_setSLEEPenable(bool enable) {
+    uint16_t oldOpConfig = BQ27441_opConfig();
+
+    // Check to see if we need to update opConfig:
+    if ((enable && (oldOpConfig & BQ27441_OPCONFIG_GPIOPOL)) ||
+        (!enable && !(oldOpConfig & BQ27441_OPCONFIG_GPIOPOL)))
+        return true;
+
+    uint16_t newOpConfig = oldOpConfig;
+    if (enable)
+        newOpConfig |= BQ27441_OPCONFIG_SLEEP;
+    else
+        newOpConfig &= ~(BQ27441_OPCONFIG_SLEEP);
+
+    return BQ27441_writeOpConfig(newOpConfig);
+}
+
+
+
 /**
     Set GPOUT polarity to active-high or active-low
 
@@ -355,6 +391,8 @@ bool BQ27441_setGPOUTPolarity(bool activeHigh) {
 
     return BQ27441_writeOpConfig(newOpConfig);
 }
+
+
 
 /**
     Get GPOUT function (BAT_LOW or SOC_INT)
@@ -392,6 +430,24 @@ bool BQ27441_setGPOUTFunction(gpout_function function) {
     return BQ27441_writeOpConfig(newOpConfig);
 }
 
+
+bool BQ27441_set_BI_PU_EN(bool detect_bat_pin_enable) {
+    uint16_t oldOpConfig = BQ27441_opConfig();
+
+    // Check to see if we need to update opConfig:
+    if ((detect_bat_pin_enable && (oldOpConfig & BQ27441_OPCONFIG_GPIOPOL)) ||
+        (!detect_bat_pin_enable && !(oldOpConfig & BQ27441_OPCONFIG_GPIOPOL)))
+        return true;
+
+    uint16_t newOpConfig = oldOpConfig;
+    if (detect_bat_pin_enable)
+        newOpConfig |= BQ27441_OPCONFIG_BI_PU_EN;
+    else
+        newOpConfig &= ~(BQ27441_OPCONFIG_BI_PU_EN);
+
+    return BQ27441_writeOpConfig(newOpConfig);
+
+}
 /**
     Get SOC1_Set Threshold - threshold to set the alert flag
 
@@ -563,6 +619,16 @@ bool BQ27441_setSOCIDelta(uint8_t delta)
 bool BQ27441_pulseGPOUT(void)
 {
     return BQ27441_executeControlWord(BQ27441_CONTROL_PULSE_SOC_INT);
+}
+
+bool BQ27441_SET_HIBERNATE(void)
+{
+    return BQ27441_executeControlWord(BQ27441_CONTROL_SET_HIBERNATE);
+}
+
+bool BQ27441_CLEAR_HIBERNATE(void)
+{
+    return BQ27441_executeControlWord(BQ27441_CONTROL_CLEAR_HIBERNATE);
 }
 
 /*****************************************************************************
