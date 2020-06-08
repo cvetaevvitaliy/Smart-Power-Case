@@ -60,7 +60,6 @@ bool BQ27441_init (void);
 
 bool BQ27441_setCapacity (uint16_t capacity);
 bool BQ27441_setDesignEnergy (uint16_t energy);
-bool BQ27441_setHibernateCurrent(uint16_t current_mA);
 bool BQ27441_setTerminateVoltageMin (uint16_t voltage);
 bool BQ27441_setChargeTermination(uint16_t voltage);
 bool BQ27441_setTaperRateTime (uint16_t rate);
@@ -84,10 +83,8 @@ uint16_t BQ27441_temperature (temp_measure type);
 
 bool BQ27441_GPOUTPolarity (void);
 bool BQ27441_setGPOUTPolarity (bool activeHigh);
-bool BQ27441_setSLEEPenable(bool enable);
 bool BQ27441_GPOUTFunction (void);
 bool BQ27441_setGPOUTFunction (gpout_function function);
-bool BQ27441_set_BI_PU_EN(bool detect_bat_pin_enable);
 uint8_t BQ27441_SOC1SetThreshold (void);
 uint8_t BQ27441_SOC1ClearThreshold (void);
 bool BQ27441_setSOC1Thresholds (uint8_t set, uint8_t clear);
