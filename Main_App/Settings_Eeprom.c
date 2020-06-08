@@ -74,8 +74,8 @@ void Settings_Set_BQ27441_Set_Min_Liion_Volt(uint16_t volt){
     if (BQ27441_enterConfig(true)){
         printf("BQ27441_enterConfig\n");
         BQ27441_setTerminateVoltageMin(volt);
-        BQ27441_setChargeTermination(4190);
-        BQ27441_setTaperRateVoltage(4190);
+        BQ27441_setChargeTermination(4130);
+        BQ27441_setTaperRateVoltage(4130);
         //Settings_Set_BQ27441_Set_Max_Liion_Volt(4150);
         if (BQ27441_exitConfig(true)){
             printf("BQ27441_exitConfig\n");
