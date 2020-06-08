@@ -558,7 +558,6 @@ void set_pixel(int x, int y, int color) {
   }
 }
 
-
 void ssd1306_Draw_Bitmap_Mono(int x, int y, const tImage *image) {
     uint8_t value = 0;
     int16_t x0, y0;
