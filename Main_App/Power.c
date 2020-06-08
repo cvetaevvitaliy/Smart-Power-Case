@@ -81,9 +81,9 @@ void Power_Battery_Task(Device_Status_t *Data){
     if (HAL_GetTick() - time_delay_task > 500) {
 
         Data->Battery_Info.temperature = BQ27441_temperature(BATTERY) / 100.0;
-        Data->Battery_Info.capacity = BQ27441_capacity(REMAIN);
-        Data->Battery_Info.capacity_full = BQ27441_capacity(FULL);
-        Data->Battery_Info.design_capacity = BQ27441_capacity(DESIGN);
+        Data->Battery_Info.capacity = BQ27441_capacity(REMAIN_F);
+        Data->Battery_Info.capacity_full = BQ27441_capacity(FULL_F);
+        Data->Battery_Info.design_capacity = BQ27441_capacity(FULL_F);
         Data->Battery_Info.Vbat = BQ27441_voltage() / 1000.0;
         Data->Battery_Info.percent = BQ27441_soc(FILTERED);
         Data->Battery_Info.percent_unfiltered = BQ27441_soc(UNFILTERED);
@@ -166,6 +166,7 @@ void Power_Off(void){
     bq2589x_enter_hiz_mode();
     ssd1306_DisplayOff();
     Power_OLED_On(false);
+    BQ27441_SET_HIBERNATE();
     HAL_Delay(100);
 
     PWR->CSR |= PWR_CSR_EWUP;
@@ -185,8 +186,11 @@ bool Power_Charger_Init(void){
         bq2589x_adc_start(true);
         bq2589x_set_prechg_current(2048);
         bq2589x_set_bat_limit(2800);
-        bq2589x_set_chargevoltage(4200);
+        bq2589x_set_chargevoltage(4140);
+        bq2589x_set_term_current(218);
+        //bq2589x_set_IR_compensation_resistor(1);
         bq2589x_enable_max_charge(true);
+        bq2589x_enable_charger();
         return true;
     } else
         return false;
