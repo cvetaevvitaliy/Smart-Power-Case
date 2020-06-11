@@ -5,7 +5,11 @@ Support QC 2.0/3.0, FastCharge charges 5V, 9V, 12V - max input 18W<br>
 Shows operating time, remaining battery capacity, remaining charging time (use fuel gauge chip BQ27441)<br>
 <br>
 *add support fw update from bootloader, use HID bootloader (https://github.com/cvetaevvitaliy/STM32_HID_Bootloader)<br>
-*add cross-platform command line flasher (https://github.com/cvetaevvitaliy/Flasher_USB_HID)<br>
+*add cross-platform command line flasher (https://github.com/cvetaevvitaliy/Flasher_USB_HID)<br> <br>
+*add cross-platform GUI flasher (https://github.com/cvetaevvitaliy/Smart-Power-Case-GUIFlasher)
+<img width="224" alt="Linux" src="https://user-images.githubusercontent.com/26421560/84379887-33094380-abef-11ea-9d6c-4b74dc4eadb8.png">
+<img width="224" alt="MacOS" src="https://user-images.githubusercontent.com/26421560/84379892-343a7080-abef-11ea-957d-4b48acbeb280.png">
+<img width="224" alt="Win" src="https://user-images.githubusercontent.com/26421560/84379972-53d19900-abef-11ea-9d15-2edbee6894fe.png">
 
 YouTube link <br>https://www.youtube.com/watch?v=Y0oo7hjzqtc <br>
 https://www.youtube.com/watch?v=4TmXY8NL-vo
