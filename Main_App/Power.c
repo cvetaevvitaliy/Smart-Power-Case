@@ -80,6 +80,8 @@ void Power_Battery_Task(Device_Status_t *Data){
 
     if (HAL_GetTick() - time_delay_task > 500) {
 
+        Power_Device_PowerOff_Timer(Data);
+
         Data->Battery_Info.temperature = BQ27441_temperature(BATTERY) / 100.0;
         Data->Battery_Info.capacity = BQ27441_capacity(REMAIN_F);
         Data->Battery_Info.capacity_full = BQ27441_capacity(FULL_F);
@@ -150,7 +152,7 @@ void Power_Battery_Task(Device_Status_t *Data){
 }
 
 
-void Power_Device_Off_On(Device_Status_t *Data){
+void Power_Device_PowerOff_Timer(Device_Status_t *Data){
 
     if (Data->work_time_minute != 0 && Data->Battery_Info.charge_flag == false) {
         if (Data->work_time_minute > Data->Device_Settings.time_auto_off)

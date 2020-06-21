@@ -20,7 +20,7 @@ bool Power_Charger_Init(void);
 void Power_Charger_Task(ChargeChip_t *Data);
 
 
-void Power_Device_Off_On(Device_Status_t *Data);
+void Power_Device_PowerOff_Timer(Device_Status_t *Data);
 void Power_Off(void);
 
 #endif //FATSHARK_POWER_V1_POWER_H

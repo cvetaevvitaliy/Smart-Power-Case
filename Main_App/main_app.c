@@ -127,8 +127,6 @@ void App_Loop(void){
 #endif
 
     Need_Reset(&Device_Status);
-    Power_Device_Off_On(&Device_Status);
-
 
 }
 
