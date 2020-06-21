@@ -22,7 +22,7 @@ void App_Setup(void){
 
     //Settings_Set_Default(&Device_Status.Device_Settings);
     Settings_Get(&Device_Status.Device_Settings);
-    if (Device_Status.Device_Settings.low_volt == 0xFFFF) {
+    if (Device_Status.Device_Settings.low_volt < 250 || Device_Status.Device_Settings.low_volt > 400) {
         Settings_Set_Default(&Device_Status.Device_Settings);
     }
 }
@@ -108,7 +108,7 @@ void App_Check_StartUp(void){
     } else {
         Device_Status.need_calibrate = false;
         BQ27441_CLEAR_HIBERNATE();
-        //Settings_Set_BQ27441_Set_Min_Liion_Volt(Device_Status.Device_Settings.low_volt);
+        Settings_Set_BQ27441_Set_Min_Liion_Volt((Device_Status.Device_Settings.low_volt * 10));
     }
 
 }
@@ -127,6 +127,7 @@ void App_Loop(void){
 #endif
 
     Need_Reset(&Device_Status);
+    Power_Device_Off_On(&Device_Status);
 
 
 }
@@ -161,6 +162,7 @@ static void Need_Reset(Device_Status_t *Data){
             uint16_t data = 0x424C;
             HAL_RTCEx_BKUPWrite(&hrtc, 4, (uint32_t) data);
             HAL_Delay(1000);
+            NVIC_SystemReset();
         }
        // SET_BIT(PWR->CR, PWR_CR_DBP);
         //WRITE_REG(BKP->DR4, 0x424C);

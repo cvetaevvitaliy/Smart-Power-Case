@@ -395,22 +395,16 @@ static void OLED_UI_Main_Screen_2(Device_Status_t *Data){
     sprintf(print_oled_string, "%.2fV", Data->Battery_Info.Vbat );
     ssd1306_Draw_String(print_oled_string, 22, 3, &Font_8x10);
 
-
-//    ssd1306_SetColor(White);
-//    ssd1306_Draw_Bitmap_Mono(3, 18, &Image_Vout);
-//    ssd1306_SetColor(Black);
-//    if (Data->Device_Settings.Boost_mode == Boost_12V)
-//        ssd1306_Draw_String(" 12V ", 22, 18, &Font_8x10);
-//    else
-//        ssd1306_Draw_String(" 8.2V", 22, 18, &Font_8x10);
-
     ssd1306_SetColor(White);
-    ssd1306_Draw_Bitmap_Mono(3, 18, &Image_Current_I);
-    ssd1306_SetColor(Black);
-    if (Data->Battery_Info.current < 0)
-        sprintf(print_oled_string, "%.1fA", (Data->Battery_Info.current / 1000.0));
-    else
+    if (Data->Battery_Info.current < 0) {
+        ssd1306_Draw_Bitmap_Mono(3, 18, &Image_Current_I);
+        sprintf(print_oled_string, "%.2fA", (Data->Battery_Info.current / 1000.0) * -1);
+    }
+    else {
+        ssd1306_Draw_Bitmap_Mono(3, 18, &Image_Current_In);
         sprintf(print_oled_string, "%.2fA", (Data->Battery_Info.current / 1000.0));
+    }
+    ssd1306_SetColor(Black);
     ssd1306_Draw_String(print_oled_string, 22, 18, &Font_8x10);
 
 

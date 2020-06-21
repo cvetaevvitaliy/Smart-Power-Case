@@ -79,6 +79,7 @@ extern const tImage Image_QC_Ico;
 extern const tImage Image_Err_Ico;
 extern const tImage Image_Current_mAh_Ico;
 extern const tImage Image_Full_mAh_Ico;
+extern const tImage Image_Current_In;
 
 #endif
 
