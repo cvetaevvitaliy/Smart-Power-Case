@@ -144,18 +144,15 @@ void Power_Battery_Task(Device_Status_t *Data){
             time_auto_off = HAL_GetTick();
         }
 
-
-
         time_delay_task = HAL_GetTick();
     }
-    //Power_Off();
 }
 
 
 void Power_Device_PowerOff_Timer(Device_Status_t *Data){
 
-    if (Data->work_time_minute != 0 && Data->Battery_Info.charge_flag == false) {
-        if (Data->work_time_minute > Data->Device_Settings.time_auto_off)
+    if (Data->work_time_minute_auto_off != 0 && Data->ChargeChip.Vbus < 3500) {
+        if (Data->work_time_minute_auto_off > Data->Device_Settings.time_auto_off)
             Power_Off();
     }
 
