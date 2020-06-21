@@ -138,6 +138,8 @@ static void Time_Task(Device_Status_t *Data){
         Data->work_time_second++;
         if (Data->work_time_second == 60){
             Data->work_time_minute++;
+            if (Data->ChargeChip.Vbus < 3500)
+                Data->work_time_minute_auto_off++;
             Data->work_time_second = 0;
             if (Data->work_time_minute == 60) {
                 Data->work_time_minute = 0;
