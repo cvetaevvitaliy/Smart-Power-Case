@@ -28,6 +28,7 @@ void Debug_Task(Device_Status_t *Data){
         printf("Battery_Info.fast_charge = %d\n\r",Data->Battery_Info.fast_charge);
         printf("Battery_Info.battery_discharging = %d\n\r",Data->Battery_Info.battery_discharging);
         printf("Data->Device_Settings.low_volt = %d\n\r",Data->Device_Settings.low_volt);
+        printf("Data->work_time_minute_auto_off = %d\n\r",Data->work_time_minute_auto_off);
 
 
     }

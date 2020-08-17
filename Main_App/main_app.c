@@ -16,7 +16,7 @@ extern RTC_HandleTypeDef hrtc;
 static Device_Status_t Device_Status = {0};
 
 static void Time_Task(Device_Status_t *Data);
-static void Need_Reset(Device_Status_t *Data);
+static void Enter_DFU_Mode(Device_Status_t *Data);
 
 void App_Setup(void){
 
@@ -64,7 +64,6 @@ void App_Init(void){
         Power_System_On(false);
         Power_Boost_Enable(false);
     } else {
-        //ssd1306_InvertDisplay();
         ssd1306_Draw_String("System Init", 20, 10, &Font_8x10);
         ssd1306_Draw_String(SOFTWARE_VERSION, 40, 20,&Font_8x10);
         ssd1306_UpdateScreen();
@@ -98,10 +97,6 @@ void App_Check_StartUp(void){
         ssd1306_Draw_String("Please", 0, 10, &Font_8x10);
         ssd1306_Draw_String("Recalibrate", 0, 20, &Font_8x10);
         ssd1306_UpdateScreen();
-        //Settings_Set_BQ27441_Set_Max_Liion_Volt(4145);
-       // Settings_Set_BQ27441_Set_Min_Liion_Volt(2900);
-        //BQ27441_setTaperRateVoltage(4100);
-        //Settings_Set_BQ27441_Set_Capacity(6000);
         Device_Status.need_calibrate = true;
         //HAL_RTCEx_BKUPWrite(&hrtc,1,1);
         HAL_Delay(2000);
@@ -126,7 +121,7 @@ void App_Loop(void){
     Debug_Task(&Device_Status);
 #endif
 
-    Need_Reset(&Device_Status);
+    Enter_DFU_Mode(&Device_Status);
 
 }
 
@@ -152,7 +147,7 @@ static void Time_Task(Device_Status_t *Data){
     }
 }
 
-static void Need_Reset(Device_Status_t *Data){
+static void Enter_DFU_Mode(Device_Status_t *Data){
 
     if (HAL_GPIO_ReadPin (Button1_GPIO_Port, Button1_Pin) && HAL_GPIO_ReadPin (Button2_GPIO_Port, Button2_Pin)) {
         if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP ) {
@@ -163,12 +158,9 @@ static void Need_Reset(Device_Status_t *Data){
             HAL_RTCEx_BKUPWrite(&hrtc, 4, (uint32_t) data);
             HAL_Delay(1000);
             NVIC_SystemReset();
+        } else {
+            // NVIC_SystemReset(); // Uncomment this, if need reset for debug FW
         }
-       // SET_BIT(PWR->CR, PWR_CR_DBP);
-        //WRITE_REG(BKP->DR4, 0x424C);
-        //CLEAR_BIT(PWR->CR, PWR_CR_DBP);
-       // HAL_Delay(1000);
-        //if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP )
-        //NVIC_SystemReset();
+
     }
 }

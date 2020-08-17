@@ -52,11 +52,8 @@ void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity){
         BQ27441_setSLEEPenable(false);
         BQ27441_setGPOUTFunction(BAT_LOW);
         BQ27441_setCapacity(capacity);
-        BQ27441_setDesignEnergy((uint16_t)(capacity * 3.8f));
+        BQ27441_setDesignEnergy((uint16_t)(capacity * 3.7f));
         BQ27441_setTaperRateTime(capacity / 22);
-        BQ27441_setTerminateVoltageMin(3000);
-        BQ27441_setChargeTermination(4115);
-        BQ27441_setTaperRateVoltage(4030);
 
         if (BQ27441_exitConfig(true)){
             printf("BQ27441_exitConfig\n");
@@ -74,8 +71,8 @@ void Settings_Set_BQ27441_Set_Min_Liion_Volt(uint16_t volt){
     if (BQ27441_enterConfig(true)){
         printf("BQ27441_enterConfig\n");
         BQ27441_setTerminateVoltageMin(volt);
-        BQ27441_setChargeTermination(4115);
-        BQ27441_setTaperRateVoltage(4030);
+        //BQ27441_setChargeTermination(4115);
+        //BQ27441_setTaperRateVoltage(4030);
         if (BQ27441_exitConfig(true)){
             printf("BQ27441_exitConfig\n");
         } else
@@ -85,18 +82,3 @@ void Settings_Set_BQ27441_Set_Min_Liion_Volt(uint16_t volt){
     BQ27441_exitConfig(false);
 
 }
-
-//void Settings_Set_BQ27441_Set_Max_Liion_Volt(uint16_t volt){
-//    BQ27441_itporFlag();
-//    if (BQ27441_enterConfig(true)){
-//        printf("BQ27441_enterConfig\n");
-//        BQ27441_setChargeTermination(volt - 10);
-//        if (BQ27441_exitConfig(true)){
-//            printf("BQ27441_exitConfig\n");
-//        } else
-//            printf("BQ27441_exitConfig false\n");
-//    } else
-//        printf("BQ27441_enterConfig false\n");
-//    BQ27441_exitConfig(false);
-//
-//}

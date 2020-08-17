@@ -7,7 +7,6 @@
 #include "stm32f1xx_hal.h"
 #include "main_app.h"
 #include "Settings_Eeprom.h"
-#include "OLED_UI_Screens.h"
 #include "Power.h"
 
 
@@ -15,8 +14,6 @@
 #define POSITION_BATTERY_Y                  1
 #define POSITION_WORK_TIME_X                70
 #define POSITION_WORK_TIME_Y                19
-#define POSITION_TEMPERATURE_X              71
-#define POSITION_TEMPERATURE_Y              5
 
 #define POSITION_TEXT_X                     3
 #define POSITION_TEXT_Y                     10
