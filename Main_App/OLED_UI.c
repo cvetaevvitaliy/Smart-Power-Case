@@ -30,27 +30,27 @@ static enum Active_Main_Screen_e{
 }Active_Main_Screen;
 
 
-static uint16_t MinMax (uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max);
+static uint16_t ScaleBat (uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max);
 
-static void OLED_UI_Draw_Frame (void);
-static void OLED_UI_Print_Main_Screen (Device_Status_t *Data);
-static void OLED_UI_Print_Menu_Page_1 (Device_Status_t *Data);
-static void OLED_UI_Print_Menu_Page_2 (Device_Status_t *Data);
+static void OLED_UI_DrawFrame (void);
+static void OLED_UI_PrintMainScreen (Device_Status_t *Data);
+static void OLED_UI_PrintMenuPage_1 (Device_Status_t *Data);
+static void OLED_UI_PrintMenuPage_2 (Device_Status_t *Data);
 static void Draw_Battery (Device_Status_t *Data);
 
-static void OLED_UI_Main_Screen_1(Device_Status_t *Data);
-static void OLED_UI_Main_Screen_2(Device_Status_t *Data);
+static void OLED_UI_MainScreen_1(Device_Status_t *Data);
+static void OLED_UI_MainScreen_2(Device_Status_t *Data);
 
-static void OLED_UI_Screen_Set_Low_Volt (Device_Status_t *Data);
-static void OLED_UI_Screen_Set_I_Max (Device_Status_t *Data);
-static void OLED_UI_Screen_Set_Vout (Device_Status_t *Data);
-static void OLED_UI_Screen_Set_Buzzer (Device_Status_t *Data);
-static void OLED_UI_Screen_Set_Time_Off (Device_Status_t *Data);
-static void OLED_UI_Screen_Set_Capacity (Device_Status_t *Data);
-static void OLED_UI_Screen_Get_Info (Device_Status_t *Data);
+static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data);
+static void OLED_UI_ScreenSetIMax (Device_Status_t *Data);
+static void OLED_UI_ScreenSetVout (Device_Status_t *Data);
+static void OLED_UI_ScreenSetBuzzer (Device_Status_t *Data);
+static void OLED_UI_ScreenSetTimeOff (Device_Status_t *Data);
+static void OLED_UI_ScreenSetCapacity (Device_Status_t *Data);
+static void OLED_UI_ScreenGetInfo (Device_Status_t *Data);
 
-static void Draw_Work_Time (Device_Status_t *Data);
-static void Draw_Type_Charger(Device_Status_t *Data);
+static void OLED_UI_DrawWorkTime (Device_Status_t *Data);
+static void OLED_UI_DrawTypeCharger(Device_Status_t *Data);
 
 
 void OLED_UI_Task(Device_Status_t *Data){
@@ -65,34 +65,34 @@ void OLED_UI_Task(Device_Status_t *Data){
 
     switch (Current_Menu) {
         case Current_Screen_Main_Progress:
-            OLED_UI_Print_Main_Screen(Data);
+            OLED_UI_PrintMainScreen(Data);
             break;
         case Current_Screen_Menu_Page_1:
-            OLED_UI_Print_Menu_Page_1(Data);
+            OLED_UI_PrintMenuPage_1(Data);
             break;
         case Current_Screen_Menu_Page_2:
-            OLED_UI_Print_Menu_Page_2(Data);
+            OLED_UI_PrintMenuPage_2(Data);
             break;
         case Current_Screen_Low_Volt:
-            OLED_UI_Screen_Set_Low_Volt(Data);
+            OLED_UI_ScreenSetLowVolt(Data);
             break;
         case Current_Screen_I_Max:
-            OLED_UI_Screen_Set_I_Max(Data);
+            OLED_UI_ScreenSetIMax(Data);
             break;
         case Current_Screen_Vout:
-            OLED_UI_Screen_Set_Vout(Data);
+            OLED_UI_ScreenSetVout(Data);
             break;
         case Current_Screen_Buzzer:
-            OLED_UI_Screen_Set_Buzzer(Data);
+            OLED_UI_ScreenSetBuzzer(Data);
             break;
         case Current_Screen_Time_Off:
-            OLED_UI_Screen_Set_Time_Off(Data);
+            OLED_UI_ScreenSetTimeOff(Data);
             break;
         case Current_Screen_Set_Capacity:
-            OLED_UI_Screen_Set_Capacity(Data);
+            OLED_UI_ScreenSetCapacity(Data);
             break;
         case Current_Screen_Get_Info:
-            OLED_UI_Screen_Get_Info(Data);
+            OLED_UI_ScreenGetInfo(Data);
             break;
 
         default:
@@ -105,7 +105,7 @@ void OLED_UI_Task(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_Draw_Frame(void ){
+static void OLED_UI_DrawFrame(void ){
 
     for (uint8_t i = 0; i < 64; i++)
         if (i % 2)
@@ -155,7 +155,7 @@ static void OLED_UI_Draw_Frame(void ){
 }
 
 
-static void OLED_UI_Print_Main_Screen(Device_Status_t *Data){
+static void OLED_UI_PrintMainScreen(Device_Status_t *Data){
 
     static uint16_t counter_power_off = 0;
     static uint32_t time_delay_counter = 0;
@@ -176,8 +176,6 @@ static void OLED_UI_Print_Main_Screen(Device_Status_t *Data){
         time_delay_counter = HAL_GetTick();
     }
 
-
-
     if (Data->State_Button.Button_menu_pushed)
         Current_Menu = Current_Screen_Menu_Page_1;
 
@@ -190,16 +188,15 @@ static void OLED_UI_Print_Main_Screen(Device_Status_t *Data){
             Active_Main_Screen = 0;
     }
 
-
-    OLED_UI_Draw_Frame();
+    OLED_UI_DrawFrame();
 
     switch (Active_Main_Screen) {
 
         case Active_Screen_1:
-            OLED_UI_Main_Screen_1(Data);
+            OLED_UI_MainScreen_1(Data);
             break;
         case Active_Screen_2:
-            OLED_UI_Main_Screen_2(Data);
+            OLED_UI_MainScreen_2(Data);
             break;
         case Active_Screen_3:
             break;
@@ -212,7 +209,7 @@ static void OLED_UI_Print_Main_Screen(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_Print_Menu_Page_1(Device_Status_t *Data){
+static void OLED_UI_PrintMenuPage_1(Device_Status_t *Data){
 
     static uint8_t ptr = 0;
 
@@ -247,7 +244,7 @@ static void OLED_UI_Print_Menu_Page_1(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_Print_Menu_Page_2(Device_Status_t *Data){
+static void OLED_UI_PrintMenuPage_2(Device_Status_t *Data){
 
     static uint8_t ptr = 0;
 
@@ -296,11 +293,6 @@ static void Draw_Battery(Device_Status_t *Data) {
     ssd1306_FillRect(2 + POSITION_BATTERY_X, 2 + POSITION_BATTERY_Y, 21, 8);
     ssd1306_SetColor(White);
 
-//    if (Data->Battery_Info.charge_flag == true){
-//        sprintf(print_oled_string, "%d%%", Data->Battery_Info.percent);
-//        ssd1306_Draw_String(print_oled_string, POSITION_BATTERY_X, 1 + POSITION_BATTERY_Y, &Font_8x10);
-//    }
-
     if (Data->Battery_Info.percent <= 5 && Data->ChargeChip.charging_status == 0) {
         if (print_low == false) {
             print_low = true;
@@ -336,14 +328,14 @@ static void Draw_Battery(Device_Status_t *Data) {
     }
 
 
-    print_percent = MinMax(Data->Battery_Info.percent, 0, 91, 0, 21);
+    print_percent = ScaleBat(Data->Battery_Info.percent, 0, 91, 0, 21);
     ssd1306_FillRect(2 + POSITION_BATTERY_X, 2 + POSITION_BATTERY_Y, print_percent, 8);
 
 
 }
 
 
-static void OLED_UI_Main_Screen_1(Device_Status_t *Data){
+static void OLED_UI_MainScreen_1(Device_Status_t *Data){
 
     ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Current_mAh_Ico);
     ssd1306_SetColor(Black);
@@ -370,25 +362,16 @@ static void OLED_UI_Main_Screen_1(Device_Status_t *Data){
         sprintf(print_oled_string, "%d", Data->Battery_Info.capacity_full);
     ssd1306_Draw_String(print_oled_string, 30, 18, &Font_8x10);
 
-//    ssd1306_SetColor(White);
-//    ssd1306_Draw_Bitmap_Mono(3, 18, &Image_Current_I);
-//    ssd1306_SetColor(Black);
-//    if (Data->Battery_Info.current < 0)
-//        sprintf(print_oled_string, "%.1fA", (Data->Battery_Info.current / 1000.0));
-//    else
-//        sprintf(print_oled_string, "%.2fA", (Data->Battery_Info.current / 1000.0));
-//    ssd1306_Draw_String(print_oled_string, 22, 18, &Font_8x10);
-
 
     if (Data->ChargeChip.charging_status == 0)
-        Draw_Work_Time(Data);
+        OLED_UI_DrawWorkTime(Data);
     else
-        Draw_Type_Charger(Data);
+        OLED_UI_DrawTypeCharger(Data);
 
 }
 
 
-static void OLED_UI_Main_Screen_2(Device_Status_t *Data){
+static void OLED_UI_MainScreen_2(Device_Status_t *Data){
 
     ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Battery_Type_Ico);
     ssd1306_SetColor(Black);
@@ -421,7 +404,7 @@ static void OLED_UI_Main_Screen_2(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_Screen_Set_Low_Volt (Device_Status_t *Data){
+static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
 
     static uint8_t ptr = 0;
     static uint8_t shift_frame;
@@ -503,7 +486,7 @@ static void OLED_UI_Screen_Set_Low_Volt (Device_Status_t *Data){
 }
 
 
-static void OLED_UI_Screen_Set_I_Max (Device_Status_t *Data) {
+static void OLED_UI_ScreenSetIMax (Device_Status_t *Data) {
 
     static uint8_t ptr = 0;
     static uint8_t shift_frame;
@@ -520,39 +503,42 @@ static void OLED_UI_Screen_Set_I_Max (Device_Status_t *Data) {
         read_settings = true;
     }
 
-    if (Data->State_Button.Button_select_pushed ) {
-        if ( ptr == 0 ) {
-            set_I_max[0]++;
-            if (set_I_max[0] == 4)
-                set_I_max[0] = 0;
-        }
-        if ( ptr == 1 ){
-            set_I_max[1]++;
-            if (set_I_max[1] == 10)
-                set_I_max[1] = 0;
-        }
-        if ( ptr == 2 ){
-            set_I_max[2]++;
-            if (set_I_max[2] == 10)
-                set_I_max[2] = 0;
-        }
-        if ( ptr == 3 ){
-            set_I_max[3]++;
-            if (set_I_max[3] == 10)
-                set_I_max[3] = 0;
-        }
-        if (ptr == 4 ){
-            Current_Menu = Current_Screen_Menu_Page_1;
-            Data->Device_Settings.current_max = (set_I_max[0] * 1000) + (set_I_max[1] * 100) + (set_I_max[2] * 10) + set_I_max[3];
-            Settings_Set(&Data->Device_Settings);
-            ptr = 0;
-        }
-    }
-
     if (Data->State_Button.Button_menu_pushed ) {
         ptr++;
-        if (ptr == 5)
-            ptr = 0;
+    }
+
+    if (Data->State_Button.Button_select_pushed ) {
+        switch (ptr) {
+            case 0:
+                set_I_max[0]++;
+                if (set_I_max[0] == 4)
+                    set_I_max[0] = 0;
+                break;
+            case 1:
+                set_I_max[1]++;
+                if (set_I_max[1] == 10)
+                    set_I_max[1] = 0;
+                break;
+            case 2:
+                set_I_max[2]++;
+                if (set_I_max[2] == 10)
+                    set_I_max[2] = 0;
+                break;
+            case 3:
+                set_I_max[3]++;
+                if (set_I_max[3] == 10)
+                    set_I_max[3] = 0;
+                break;
+            case 4:
+                Current_Menu = Current_Screen_Menu_Page_1;
+                Data->Device_Settings.current_max =
+                        (set_I_max[0] * 1000) + (set_I_max[1] * 100) + (set_I_max[2] * 10) + set_I_max[3];
+                Settings_Set(&Data->Device_Settings);
+                ptr = 0;
+                break;
+            default:
+                ptr = 0;
+        }
     }
 
     ssd1306_Draw_Bitmap_Mono(0, 2, &Image_Frame_27x27);
@@ -575,7 +561,7 @@ static void OLED_UI_Screen_Set_I_Max (Device_Status_t *Data) {
 }
 
 
-static void OLED_UI_Screen_Set_Vout (Device_Status_t *Data){
+static void OLED_UI_ScreenSetVout (Device_Status_t *Data){
 
     static uint8_t ptr = 0;
 
@@ -634,7 +620,7 @@ static void OLED_UI_Screen_Set_Vout (Device_Status_t *Data){
 }
 
 
-static void OLED_UI_Screen_Set_Buzzer (Device_Status_t *Data){
+static void OLED_UI_ScreenSetBuzzer (Device_Status_t *Data){
 
     static uint8_t ptr = 0;
 
@@ -688,7 +674,7 @@ static void OLED_UI_Screen_Set_Buzzer (Device_Status_t *Data){
 }
 
 
-static void OLED_UI_Screen_Set_Time_Off (Device_Status_t *Data) {
+static void OLED_UI_ScreenSetTimeOff (Device_Status_t *Data) {
 
     static uint8_t ptr = 0;
     static uint8_t time_minutes = 0;
@@ -745,7 +731,7 @@ static void OLED_UI_Screen_Set_Time_Off (Device_Status_t *Data) {
 }
 
 
-static void OLED_UI_Screen_Set_Capacity (Device_Status_t *Data){
+static void OLED_UI_ScreenSetCapacity (Device_Status_t *Data){
 
 
     static uint8_t ptr = 0;
@@ -823,7 +809,7 @@ static void OLED_UI_Screen_Set_Capacity (Device_Status_t *Data){
 }
 
 
-static void OLED_UI_Screen_Get_Info (Device_Status_t *Data){
+static void OLED_UI_ScreenGetInfo (Device_Status_t *Data){
 
     ssd1306_Draw_Bitmap_Mono(2, 5, &Image_Battery_Type_Ico);
     ssd1306_Draw_Bitmap_Mono(2, 18, &Image_Battery_Life_Ico);
@@ -845,7 +831,7 @@ static void OLED_UI_Screen_Get_Info (Device_Status_t *Data){
 }
 
 
-static void Draw_Work_Time(Device_Status_t *Data){
+static void OLED_UI_DrawWorkTime(Device_Status_t *Data){
 
     ssd1306_SetColor(White);
     ssd1306_Draw_Bitmap_Mono(72, 3, &Image_Power_On_Time);
@@ -863,7 +849,7 @@ static void Draw_Work_Time(Device_Status_t *Data){
 }
 
 
-static void Draw_Type_Charger(Device_Status_t *Data){
+static void OLED_UI_DrawTypeCharger(Device_Status_t *Data){
     ssd1306_SetColor(White);
 
     if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP)
@@ -884,7 +870,7 @@ static void Draw_Type_Charger(Device_Status_t *Data){
 }
 
 
-static uint16_t MinMax(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max)
+static uint16_t ScaleBat(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max)
 {
     if (x < in_min)
         return out_min;
