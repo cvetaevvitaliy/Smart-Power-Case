@@ -11,6 +11,9 @@ set(VERSIONFW "${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}")
 add_definitions(-DSOFTWARE_VERSION=\"${VERSIONFW}\")
 if (DEBUG STREQUAL ON)
     add_definitions(-DUSE_USB_DEBUG_PRINTF)
+    set(OPTIMIZATION_LEVEL -g)
+    else()
+    set(OPTIMIZATION_LEVEL -O2)
 endif()
 
 SET(CMAKE_C_COMPILER_WORKS 1)
@@ -27,7 +30,7 @@ SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
 
 SET(COMMON_FLAGS
     "-mcpu=cortex-m3 ${FPU_FLAGS} -mthumb -mthumb-interwork -ffunction-sections -fdata-sections \
-    -g  -fno-common -fmessage-length=0 -specs=nosys.specs -specs=nano.specs")
+    ${OPTIMIZATION_LEVEL} -fno-common -fmessage-length=0 -specs=nosys.specs -specs=nano.specs")
 
 SET(CMAKE_CXX_FLAGS_INIT "${COMMON_FLAGS} -std=c++11")
 SET(CMAKE_C_FLAGS_INIT "${COMMON_FLAGS} -std=gnu99")
