@@ -147,8 +147,8 @@ void Power_BatteryTask(Device_Status_t *Data){
 
 void Power_DevicePowerOffTimer(const Device_Status_t *Data){
 
-    if (Data->work_time_minute_auto_off != 0 && Data->ChargeChip.charging_status == 0 ) {
-        if (Data->work_time_minute_auto_off > Data->Device_Settings.time_auto_off)
+    if (Data->time_for_auto_off != 0 && Data->ChargeChip.charging_status == 0 ) {
+        if (Data->time_for_auto_off > Data->Device_Settings.time_auto_off)
             Power_Off();
     }
 

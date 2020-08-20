@@ -121,7 +121,7 @@ void App_Loop(void){
 
     Time_Task(&Device_Status);
     ADC_Task(&Device_Status.ADC_Data);
-    Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings);
+    Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings, &Device_Status.time_for_auto_off);
     OLED_UI_Task(&Device_Status);
     Power_BatteryTask(&Device_Status);
     Power_ChargerTask(&Device_Status.ChargeChip);
@@ -142,7 +142,7 @@ static void Time_Task(Device_Status_t *Data){
         if (Data->work_time_second == 60){
             Data->work_time_minute++;
             if (Data->ChargeChip.Vbus < 3500)
-                Data->work_time_minute_auto_off++;
+                Data->time_for_auto_off++;
             Data->work_time_second = 0;
             if (Data->work_time_minute == 60) {
                 Data->work_time_minute = 0;

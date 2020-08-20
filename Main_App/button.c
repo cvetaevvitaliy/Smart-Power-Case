@@ -37,13 +37,16 @@ static void BounceButton (Button_t *Data){
 
 }
 
-void Button_Task(Button_t *Data, const Device_Settings_t *Settings) {
+void Button_Task(Button_t *Data, const Device_Settings_t *Settings, uint8_t* time) {
 
     static uint32_t time_power_off = 0;
     static bool start_delay = false;
 
     State_Button_t.button_beep = Settings->buzzer_enable;
     BounceButton(Data);
+
+    if (State_Button_t.button_select && State_Button_t.button_menu)
+        time = 0;
 
     if (!Settings->locked_power_off) {
         if (!HAL_GPIO_ReadPin(ButtonSelect_GPIO_Port, Button_Select_Pin) && !start_delay) {

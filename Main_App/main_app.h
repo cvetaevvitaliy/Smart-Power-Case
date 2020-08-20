@@ -106,7 +106,7 @@ typedef struct {
     Button_t State_Button;
     Device_Error_e Device_Error;
     ChargeChip_t ChargeChip;
-    uint8_t work_time_minute_auto_off;
+    uint8_t time_for_auto_off;
     uint8_t work_time_minute;
     uint8_t work_time_second;
     uint8_t work_time_hours;

@@ -8,6 +8,6 @@
 #include "main_app.h"
 #include "Power.h"
 
-void Button_Task(Button_t *Data, const Device_Settings_t *Settings);
+void Button_Task(Button_t *Data, const Device_Settings_t *Settings, uint8_t* time);
 
 #endif //FATSHARK_POWER_V1_BUTTON_H
