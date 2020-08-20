@@ -21,18 +21,17 @@ typedef enum {
     Boost_12V,
 }Boost_mode_e;
 
-static char print_error[8][15] = {
-        "",
+static char print_error[7][15] = {
         "BQ27441",
         "SSD1306",
         "ADC",
+        "BQ25895"
         "Temp",
         "Batt",
         "Booster",
         "Booster_Set_12V",};
 
 typedef enum {
-    Device_OK,
     Device_Error_BQ27441,
     Device_Error_SSD1306,
     Device_Error_ADC,
