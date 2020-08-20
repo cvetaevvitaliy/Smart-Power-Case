@@ -63,6 +63,11 @@ void OLED_UI_Task(Device_Status_t *Data){
 
     ssd1306_Clear();
 
+    if (Current_Menu == Current_Screen_Main_Progress)
+        Data->Device_Settings.locked_power_off = false;
+    else
+        Data->Device_Settings.locked_power_off = true;
+
     switch (Current_Menu) {
         case Current_Screen_Main_Progress:
             OLED_UI_PrintMainScreen(Data);
@@ -156,25 +161,6 @@ static void OLED_UI_DrawFrame(void ){
 
 
 static void OLED_UI_PrintMainScreen(Device_Status_t *Data){
-
-    static uint16_t counter_power_off = 0;
-    static uint32_t time_delay_counter = 0;
-
-    if (Data->State_Button.Button_select_pushed){
-        counter_power_off ++;
-        if (counter_power_off > 8) {
-            ssd1306_Draw_String("Power Off", 20, 10, &Font_8x10);
-            ssd1306_UpdateScreen();
-            TIM2->ARR = 30000;
-            HAL_TIM_Base_Start_IT(&htim2);
-            HAL_Delay(1000);
-            Power_Off();
-        }
-
-    } else if (HAL_GetTick() - time_delay_counter > 10000){
-        counter_power_off = 0;
-        time_delay_counter = HAL_GetTick();
-    }
 
     if (Data->State_Button.Button_menu_pushed)
         Current_Menu = Current_Screen_Menu_Page_1;
@@ -447,7 +433,7 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
 
             Data->Device_Settings.low_volt = (first_position * 100) + (second_position * 10) + third_position;
             Settings_Set(&Data->Device_Settings);
-            Settings_Set_BQ27441_Set_Min_Liion_Volt(Data->Device_Settings.low_volt);
+            Settings_SetBQ27441SetMinLiionVolt(Data->Device_Settings.low_volt);
             ptr = 0;
             Data->need_calibrate = false;
         }
@@ -607,9 +593,9 @@ static void OLED_UI_ScreenSetVout (Device_Status_t *Data){
         if (ptr == 2) {
             Current_Menu = Current_Screen_Menu_Page_1;
             if (Data->Device_Settings.Boost_mode == Boost_12V)
-                Power_Boost_Enable_12V(true);
+                Power_BoostEnable12V(true);
             else
-                Power_Boost_Enable_12V(false);
+                Power_BoostEnable12V(false);
             Settings_Set(&Data->Device_Settings);
             ptr = 0;
         }
@@ -778,7 +764,7 @@ static void OLED_UI_ScreenSetCapacity (Device_Status_t *Data){
 
             Data->Device_Settings.design_capacity = (set_capacity[0] * 1000) + (set_capacity[1] * 100) + (set_capacity[2] * 10) + set_capacity[3];
             Settings_Set(&Data->Device_Settings);
-            Settings_Set_BQ27441_Set_Capacity(Data->Device_Settings.design_capacity);
+            Settings_SetBQ27441SetCapacity(Data->Device_Settings.design_capacity);
             ptr = 0;
         }
     }

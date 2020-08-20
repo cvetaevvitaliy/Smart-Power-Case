@@ -27,7 +27,7 @@ void Settings_Set(Device_Settings_t *Data){
 }
 
 
-void Settings_Set_Default(Device_Settings_t *Data) {
+void Settings_SetDefault(Device_Settings_t *Data) {
     Data->current_max = 666;
     Data->low_volt = 332;
     Data->design_capacity = 2540;
@@ -39,7 +39,7 @@ void Settings_Set_Default(Device_Settings_t *Data) {
 }
 
 
-void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity){
+void Settings_SetBQ27441SetCapacity(uint16_t capacity){
 
     BQ27441_Full_Reset();
 
@@ -52,7 +52,7 @@ void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity){
         BQ27441_setSLEEPenable(false);
         BQ27441_setGPOUTFunction(BAT_LOW);
         BQ27441_setCapacity(capacity);
-        BQ27441_setDesignEnergy((uint16_t)(capacity * 3.7f));
+        BQ27441_setDesignEnergy((uint16_t)(capacity * 3.6f));
         BQ27441_setTaperRateTime(capacity / 22);
 
         if (BQ27441_exitConfig(true)){
@@ -66,12 +66,12 @@ void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity){
 }
 
 
-void Settings_Set_BQ27441_Set_Min_Liion_Volt(uint16_t volt){
+void Settings_SetBQ27441SetMinLiionVolt(uint16_t volt){
     bq2589x_set_bat_limit(volt);
     if (BQ27441_enterConfig(true)){
         printf("BQ27441_enterConfig\n");
         BQ27441_setTerminateVoltageMin(volt);
-        //BQ27441_setChargeTermination(4115);
+        BQ27441_setChargeTermination(4114);
         //BQ27441_setTaperRateVoltage(4030);
         if (BQ27441_exitConfig(true)){
             printf("BQ27441_exitConfig\n");

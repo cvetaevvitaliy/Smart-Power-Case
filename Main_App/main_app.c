@@ -7,11 +7,14 @@
 #include "button.h"
 #include "Power.h"
 #include "Settings_Eeprom.h"
+#ifdef USE_USB_DEBUG_PRINTF
 #include "Debug.h"
+#endif
 
 extern DMA_HandleTypeDef hdma_adc1;
 extern I2C_HandleTypeDef hi2c1;
 extern RTC_HandleTypeDef hrtc;
+extern TIM_HandleTypeDef htim2;
 
 static Device_Status_t Device_Status = {0};
 
@@ -20,16 +23,17 @@ static void Enter_DFU_Mode(Device_Status_t *Data);
 
 void App_Setup(void){
 
-    //Settings_Set_Default(&Device_Status.Device_Settings);
+    HAL_TIM_Base_Start_IT(&htim2);
+    //Settings_SetDefault(&Device_Status.Device_Settings);
     Settings_Get(&Device_Status.Device_Settings);
     if (Device_Status.Device_Settings.low_volt < 250 || Device_Status.Device_Settings.low_volt > 400) {
-        Settings_Set_Default(&Device_Status.Device_Settings);
+        Settings_SetDefault(&Device_Status.Device_Settings);
     }
 }
 
 void App_Init(void){
 
-    if (Power_Charger_Init() == false){
+    if (Power_ChargerInit() == false){
         Device_Status.Device_Error = Device_Error_BQ25895;
         Device_Status.system_critical_error = true;
 #ifdef USE_USB_DEBUG_PRINTF
@@ -52,17 +56,17 @@ void App_Init(void){
 #endif
     }
 
-    Power_OLED_On(true);
-    Power_Boost_Enable(true);
+    Power_OLEDOn(true);
+    Power_BoostEnable(true);
     if (ssd1306_Init() == false) {
         Device_Status.Device_Error = Device_Error_SSD1306;
         Device_Status.system_critical_error = true;
 #ifdef USE_USB_DEBUG_PRINTF
         printf("ssd1306 not found\n");
 #endif
-        Power_OLED_On(false);
-        Power_System_On(false);
-        Power_Boost_Enable(false);
+        Power_OLEDOn(false);
+        Power_SystemOn(false);
+        Power_BoostEnable(false);
     } else {
         ssd1306_Draw_String("System Init", 20, 10, &Font_8x10);
         ssd1306_Draw_String(SOFTWARE_VERSION, 40, 20,&Font_8x10);
@@ -73,24 +77,27 @@ void App_Init(void){
 
 }
 
-void App_Check_StartUp(void){
+bool App_Check_StartUp(void){
 
     if (Device_Status.system_critical_error == true){
 #ifdef USE_USB_DEBUG_PRINTF
         printf("Error %d\n", Device_Status.Device_Error);
 #endif
-        ssd1306_Draw_String("Error System", 0, 0, &Font_8x10);
-        ssd1306_Draw_String(print_error[Device_Status.Device_Error], 0, 10, &Font_8x10);
-        ssd1306_UpdateScreen();
-        HAL_Delay(2000);
-        ssd1306_Clear();
+        if (Device_Status.Device_Error != Device_Error_SSD1306) {
+            ssd1306_Draw_String("Error System", 0, 0, &Font_8x10);
+            ssd1306_Draw_String(print_error[Device_Status.Device_Error], 0, 10, &Font_8x10);
+            ssd1306_UpdateScreen();
+            HAL_Delay(2000);
+            ssd1306_Clear();
+        }
+        return false;
     } else {
-        Power_System_On(true);
-        Power_Boost_Enable(true);
+        Power_SystemOn(true);
+        Power_BoostEnable(true);
         if (Device_Status.Device_Settings.Boost_mode == Boost_12V)
-            Power_Boost_Enable_12V(true);
+            Power_BoostEnable12V(true);
         else
-            Power_Boost_Enable_12V(false);
+            Power_BoostEnable12V(false);
     }
     if (BQ27441_itporFlag() ) {
         ssd1306_Draw_String("Find NEW BAT", 0, 0, &Font_8x10);
@@ -103,8 +110,9 @@ void App_Check_StartUp(void){
     } else {
         Device_Status.need_calibrate = false;
         BQ27441_CLEAR_HIBERNATE();
-        Settings_Set_BQ27441_Set_Min_Liion_Volt((Device_Status.Device_Settings.low_volt * 10));
+        Settings_SetBQ27441SetMinLiionVolt((Device_Status.Device_Settings.low_volt * 10));
     }
+    return true;
 
 }
 
@@ -115,8 +123,8 @@ void App_Loop(void){
     ADC_Task(&Device_Status.ADC_Data);
     Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings);
     OLED_UI_Task(&Device_Status);
-    Power_Battery_Task(&Device_Status);
-    Power_Charger_Task(&Device_Status.ChargeChip);
+    Power_BatteryTask(&Device_Status);
+    Power_ChargerTask(&Device_Status.ChargeChip);
 #ifdef USE_USB_DEBUG_PRINTF
     Debug_Task(&Device_Status);
 #endif
@@ -145,13 +153,15 @@ static void Time_Task(Device_Status_t *Data){
             }
         }
     }
+    Power_DevicePowerOffTimer(Data);
 }
 
 static void Enter_DFU_Mode(Device_Status_t *Data){
 
-    if (HAL_GPIO_ReadPin (Button1_GPIO_Port, Button1_Pin) && HAL_GPIO_ReadPin (Button2_GPIO_Port, Button2_Pin)) {
+    if (HAL_GPIO_ReadPin (ButtonMenu_GPIO_Port, Button_Menu_Pin) && HAL_GPIO_ReadPin (ButtonSelect_GPIO_Port, Button_Select_Pin)) {
         if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP ) {
             ssd1306_Clear();
+            Data->ADC_Data.Vbus = 0;
             ssd1306_Draw_String("DFU 3.0", 30, 10, &Font_8x10);
             ssd1306_UpdateScreen();
             uint16_t data = 0x424C;

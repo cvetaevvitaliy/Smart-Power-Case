@@ -52,7 +52,7 @@ typedef struct {
 typedef struct {
     float Vbus;
     float Vout;
-    float temperature;
+    float internal_temperature_stm;
 
 }ADC_Voltage_Data_t;
 
@@ -82,6 +82,7 @@ typedef struct {
     uint16_t time_auto_off;
     bool buzzer_enable;
     bool Boost_mode;
+    bool locked_power_off;
 
 }Device_Settings_t;
 
@@ -118,7 +119,7 @@ typedef struct {
 
 void App_Setup(void);
 void App_Init(void);
-void App_Check_StartUp(void);
+bool App_Check_StartUp(void);
 void App_Loop(void);
 
 #endif //FATSHARKPOWER_SMART_POWER_APP_H

@@ -128,7 +128,6 @@ int main(void)
   MX_DMA_Init();
   MX_I2C1_Init();
   MX_ADC1_Init();
- // MX_USB_DEVICE_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_RTC_Init();
@@ -136,11 +135,12 @@ int main(void)
   DWT_Delay_Init();
   App_Setup();
   App_Init();
-  App_Check_StartUp();
+  if (!App_Check_StartUp())
+      _Error_Handler(__FILE__, __LINE__);
   //HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
   //TIM1->CR1 |= TIM_CR1_OPM;
-  HAL_TIM_Base_Start_IT(&htim2);
-  /* USER CODE END 2 *
+  //HAL_TIM_Base_Start_IT(&htim2);
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -469,9 +469,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LCD_En_Pin|SYS_On_Pin|Vout_En_12V_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : Button1_Pin Button2_Pin */
-  GPIO_InitStruct.Pin = Button1_Pin|Button2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  /*Configure GPIO pins : Button_Menu_Pin Button_Select_Pin CHG_Pin Vbus_detect_Pin */
+  GPIO_InitStruct.Pin = Button_Menu_Pin | Button_Select_Pin | CHG_Pin | Vbus_detect_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
@@ -482,18 +482,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CHG_Pin Vbus_detect_Pin */
-  GPIO_InitStruct.Pin = CHG_Pin|Vbus_detect_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : IRQ_BAT_LOW_Pin */
-  GPIO_InitStruct.Pin = IRQ_BAT_LOW_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(IRQ_BAT_LOW_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : LCD_En_Pin SYS_On_Pin Vout_En_12V_Pin */
   GPIO_InitStruct.Pin = LCD_En_Pin|SYS_On_Pin|Vout_En_12V_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -502,6 +490,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
   HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI2_IRQn);
 

@@ -10,8 +10,4 @@
 bool ADC_Init(void);
 void ADC_Task(ADC_Voltage_Data_t *Data);
 
-float ADC_Get_Vbus(void);
-float ADC_Get_Vout(void);
-float ADC_Get_Temperature_PCB(void);
-
 #endif //FATSHARK_POWER_V1_ADC_H
