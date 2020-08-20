@@ -158,7 +158,7 @@ static void Time_Task(Device_Status_t *Data){
 
 static void Enter_DFU_Mode(Device_Status_t *Data){
 
-    if (HAL_GPIO_ReadPin (Button1_GPIO_Port, Button1_Pin) && HAL_GPIO_ReadPin (Button2_GPIO_Port, Button2_Pin)) {
+    if (HAL_GPIO_ReadPin (ButtonMenu_GPIO_Port, Button_Menu_Pin) && HAL_GPIO_ReadPin (ButtonSelect_GPIO_Port, Button_Select_Pin)) {
         if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP ) {
             ssd1306_Clear();
             Data->ADC_Data.Vbus = 0;

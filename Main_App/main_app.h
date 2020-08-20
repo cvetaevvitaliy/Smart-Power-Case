@@ -82,6 +82,7 @@ typedef struct {
     uint16_t time_auto_off;
     bool buzzer_enable;
     bool Boost_mode;
+    bool locked_power_off;
 
 }Device_Settings_t;
 

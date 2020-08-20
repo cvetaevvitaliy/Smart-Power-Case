@@ -157,6 +157,13 @@ void Power_DevicePowerOffTimer(const Device_Status_t *Data){
 
 void Power_Off(void){
 
+    ssd1306_Clear();
+    ssd1306_Draw_String("Power Off", 20, 10, &Font_8x10);
+    ssd1306_UpdateScreen();
+    TIM2->ARR = 30000;
+    HAL_TIM_Base_Start_IT(&htim2);
+    HAL_Delay(300);
+
     bq2589x_enter_ship_mode();
     bq2589x_enter_hiz_mode();
     ssd1306_DisplayOff();
@@ -167,7 +174,6 @@ void Power_Off(void){
     PWR->CSR |= PWR_CSR_EWUP;
     PWR->CR  |= PWR_CR_CWUF;
     PWR->CR = PWR_CR_PDDS | PWR_CR_CWUF;
-    //HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
     HAL_PWR_EnterSTANDBYMode();
 
 }
@@ -179,10 +185,10 @@ bool Power_ChargerInit(void){
         bq2589x_exit_hiz_mode();
         bq2589x_set_charge_current(4000);
         bq2589x_adc_start(true);
-        bq2589x_set_prechg_current(2048);
+        bq2589x_set_prechg_current(1024);
         bq2589x_set_bat_limit(2800);
         bq2589x_set_chargevoltage(4140);
-        bq2589x_set_term_current(150);
+        bq2589x_set_term_current(64);
         //bq2589x_set_IR_compensation_resistor(1);
         bq2589x_enable_max_charge(true);
         bq2589x_enable_charger();

@@ -52,7 +52,7 @@ void Settings_SetBQ27441SetCapacity(uint16_t capacity){
         BQ27441_setSLEEPenable(false);
         BQ27441_setGPOUTFunction(BAT_LOW);
         BQ27441_setCapacity(capacity);
-        BQ27441_setDesignEnergy((uint16_t)(capacity * 3.7f));
+        BQ27441_setDesignEnergy((uint16_t)(capacity * 3.6f));
         BQ27441_setTaperRateTime(capacity / 22);
 
         if (BQ27441_exitConfig(true)){
@@ -71,7 +71,7 @@ void Settings_SetBQ27441SetMinLiionVolt(uint16_t volt){
     if (BQ27441_enterConfig(true)){
         printf("BQ27441_enterConfig\n");
         BQ27441_setTerminateVoltageMin(volt);
-        //BQ27441_setChargeTermination(4115);
+        BQ27441_setChargeTermination(4114);
         //BQ27441_setTaperRateVoltage(4030);
         if (BQ27441_exitConfig(true)){
             printf("BQ27441_exitConfig\n");

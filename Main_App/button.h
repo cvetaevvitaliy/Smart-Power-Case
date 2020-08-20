@@ -6,6 +6,7 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "main_app.h"
+#include "Power.h"
 
 void Button_Task(Button_t *Data, const Device_Settings_t *Settings);
 

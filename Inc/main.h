@@ -59,10 +59,12 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define Button1_Pin GPIO_PIN_1
-#define Button1_GPIO_Port GPIOA
-#define Button2_Pin GPIO_PIN_2
-#define Button2_GPIO_Port GPIOA
+#define Button_Menu_Pin GPIO_PIN_1
+#define ButtonMenu_GPIO_Port GPIOA
+#define ButtonMenu_EXTI_IRQn EXTI1_IRQn
+#define Button_Select_Pin GPIO_PIN_2
+#define ButtonSelect_GPIO_Port GPIOA
+#define ButtonSelect_EXTI_IRQn EXTI2_IRQn
 #define USB_En_Pin GPIO_PIN_4
 #define USB_En_GPIO_Port GPIOA
 #define Bust_En_Pin GPIO_PIN_5
@@ -70,9 +72,6 @@
 #define CHG_Pin GPIO_PIN_7
 #define CHG_GPIO_Port GPIOA
 #define CHG_EXTI_IRQn EXTI9_5_IRQn
-#define IRQ_BAT_LOW_Pin GPIO_PIN_2
-#define IRQ_BAT_LOW_GPIO_Port GPIOB
-#define IRQ_BAT_LOW_EXTI_IRQn EXTI2_IRQn
 #define PWM_Buzz_Pin GPIO_PIN_8
 #define PWM_Buzz_GPIO_Port GPIOA
 #define Vbus_detect_Pin GPIO_PIN_15
