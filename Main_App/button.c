@@ -18,14 +18,14 @@ static struct State_Button {
 
 static void BeepEvent(void){
 
-    if ( State_Button_t.button_beep == true) {
+    if (State_Button_t.button_beep) {
         TIM2->ARR = 2000;
         HAL_TIM_Base_Start_IT(&htim2);
         State_Button_t.time_btn_menu = HAL_GetTick();
     }
 }
 
-static void CheckedTimeDelay (Button_t *Data){
+static void BounceButton (Button_t *Data){
 
     Data->Button_menu_pushed = State_Button_t.button_menu;
     Data->Button_select_pushed = State_Button_t.button_select;
@@ -43,7 +43,7 @@ void Button_Task(Button_t *Data, const Device_Settings_t *Settings) {
     static bool start_delay = false;
 
     State_Button_t.button_beep = Settings->buzzer_enable;
-    CheckedTimeDelay(Data);
+    BounceButton(Data);
 
     if (!Settings->locked_power_off) {
         if (!HAL_GPIO_ReadPin(ButtonSelect_GPIO_Port, Button_Select_Pin) && !start_delay) {
