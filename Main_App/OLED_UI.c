@@ -162,24 +162,6 @@ static void OLED_UI_DrawFrame(void ){
 
 static void OLED_UI_PrintMainScreen(Device_Status_t *Data){
 
-//    static uint16_t counter_power_off = 0;
-//    static uint32_t time_delay_counter = 0;
-//
-//    if (Data->State_Button.Button_select_pushed){
-//        counter_power_off ++;
-//        if (counter_power_off > 8) {
-//            Power_Off();
-//        }
-//        if (counter_power_off > 1)
-//            Data->Device_Settings.buzzer_enable = false; // for one beep todo need refactor&cleanup GUI, implement buzzer interface
-//
-//    } else if (HAL_GetTick() - time_delay_counter > 5000){
-//        counter_power_off = 0;
-//        Data->Device_Settings.buzzer_enable = true;
-//        time_delay_counter = HAL_GetTick();
-//    }
-
-
     if (Data->State_Button.Button_menu_pushed)
         Current_Menu = Current_Screen_Menu_Page_1;
 
@@ -217,7 +199,7 @@ static void OLED_UI_PrintMenuPage_1(Device_Status_t *Data){
 
     static uint8_t ptr = 0;
 
-    if (Data->State_Button.Button_menu_pushed || Data->State_Button.Button_menu_pressed) {
+    if (Data->State_Button.Button_menu_pushed) {
         ptr++;
         if (ptr > 3) {
             Current_Menu = Current_Screen_Menu_Page_2;
@@ -252,7 +234,7 @@ static void OLED_UI_PrintMenuPage_2(Device_Status_t *Data){
 
     static uint8_t ptr = 0;
 
-    if (Data->State_Button.Button_menu_pushed || Data->State_Button.Button_menu_pressed){
+    if (Data->State_Button.Button_menu_pushed){
         ptr++;
         if (ptr > 3) {
             Current_Menu = Current_Screen_Menu_Page_1;
