@@ -16,6 +16,20 @@ if (DEBUG STREQUAL ON)
     set(OPTIMIZATION_LEVEL -O2)
 endif()
 
+# Set type STM32 STM32F103T8U - 64kb flash, STM32F103TBU - 128kb flash (add cmake build flag TYPE_MCU=F103TBU or TYPE_MCU=F103T8U)
+set(TYPE_MCU_STM F103TBU F103T8U)
+foreach(MCU ${TYPE_MCU_STM})
+    if (TYPE_MCU STREQUAL F103T8U)
+        SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103T8Ux_FLASH.ld)
+        add_definitions(-DSTM32F103T8U)
+        message(STM32F103T8U)
+    else()
+        add_definitions(-DSTM32F103TBU)
+        message(STM32F103TBU)
+        SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
+    endif()
+endforeach()
+
 SET(CMAKE_C_COMPILER_WORKS 1)
 SET(CMAKE_C_COMPILER arm-none-eabi-gcc)
 SET(CMAKE_CXX_COMPILER_WORKS 1)
@@ -26,7 +40,7 @@ set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_OBJDUMP arm-none-eabi-objdump)
 set(SIZE arm-none-eabi-size)
 
-SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
+#SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
 
 SET(COMMON_FLAGS
     "-mcpu=cortex-m3 ${FPU_FLAGS} -mthumb -mthumb-interwork -ffunction-sections -fdata-sections \
@@ -79,6 +93,7 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${SIZE} --format=berkeley ${PROJECT_NAME}.elf
         COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+        #COMMAND ${CMAKE_OBJDUMP} -x $<TARGET_FILE:${PROJECT_NAME}.elf>
         COMMAND dd if=${PROJECT_SOURCE_DIR}/bootloader.bin of=FullFW.bin bs=1 count=2048
         COMMAND dd if=${PROJECT_BINARY_DIR}/${PROJECT_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin of=FullFW.bin bs=1 seek=2048
         COMMENT "Building ${HEX_FILE}
