@@ -297,10 +297,10 @@ uint8_t BQ27441_soh(soh_measure type) {
 }
 
 /**
-    Reads and returns specified temperature measurement
+    Reads and returns specified internal_temperature_stm measurement
 
     @param temp_measure enum specifying internal or battery measurement
-    @return specified temperature measurement in degrees C
+    @return specified internal_temperature_stm measurement in degrees C
 */
 uint16_t BQ27441_temperature(temp_measure type) {
     //type = BATTERY;

@@ -447,7 +447,7 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
 
             Data->Device_Settings.low_volt = (first_position * 100) + (second_position * 10) + third_position;
             Settings_Set(&Data->Device_Settings);
-            Settings_Set_BQ27441_Set_Min_Liion_Volt(Data->Device_Settings.low_volt);
+            Settings_SetBQ27441SetMinLiionVolt(Data->Device_Settings.low_volt);
             ptr = 0;
             Data->need_calibrate = false;
         }
@@ -607,9 +607,9 @@ static void OLED_UI_ScreenSetVout (Device_Status_t *Data){
         if (ptr == 2) {
             Current_Menu = Current_Screen_Menu_Page_1;
             if (Data->Device_Settings.Boost_mode == Boost_12V)
-                Power_Boost_Enable_12V(true);
+                Power_BoostEnable12V(true);
             else
-                Power_Boost_Enable_12V(false);
+                Power_BoostEnable12V(false);
             Settings_Set(&Data->Device_Settings);
             ptr = 0;
         }
@@ -778,7 +778,7 @@ static void OLED_UI_ScreenSetCapacity (Device_Status_t *Data){
 
             Data->Device_Settings.design_capacity = (set_capacity[0] * 1000) + (set_capacity[1] * 100) + (set_capacity[2] * 10) + set_capacity[3];
             Settings_Set(&Data->Device_Settings);
-            Settings_Set_BQ27441_Set_Capacity(Data->Device_Settings.design_capacity);
+            Settings_SetBQ27441SetCapacity(Data->Device_Settings.design_capacity);
             ptr = 0;
         }
     }

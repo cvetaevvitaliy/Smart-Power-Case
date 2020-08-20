@@ -40,7 +40,7 @@ typedef enum {
     SOH_STAT  // State of Health Status Bits
 } soh_measure;
 
-// Parameters for the temperature() function
+// Parameters for the internal_temperature_stm() function
 typedef enum {
     BATTERY,      // Battery Temperature (DEFAULT)
     INTERNAL_TEMP // Internal IC Temperature

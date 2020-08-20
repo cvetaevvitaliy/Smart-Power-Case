@@ -8,9 +8,9 @@
 
 void Settings_Get(Device_Settings_t *Data);
 void Settings_Set(Device_Settings_t *Data);
-void Settings_Set_Default(Device_Settings_t *Data);
-void Settings_Set_BQ27441_Set_Capacity(uint16_t capacity);
-void Settings_Set_BQ27441_Set_Min_Liion_Volt(uint16_t volt);
+void Settings_SetDefault(Device_Settings_t *Data);
+void Settings_SetBQ27441SetCapacity(uint16_t capacity);
+void Settings_SetBQ27441SetMinLiionVolt(uint16_t volt);
 void Settings_Set_BQ27441_Set_Max_Liion_Volt(uint16_t volt);
 
 

@@ -43,8 +43,6 @@ void Button_Task(Button_t *Data, const Device_Settings_t *Settings) {
         Data->Button_menu_pushed = false;
 
 
-
-
     if (State_Button.Button2 == true)
         State_Button.counter_button2++;
     if (State_Button.Button2 == false && State_Button.counter_button2 > 0)

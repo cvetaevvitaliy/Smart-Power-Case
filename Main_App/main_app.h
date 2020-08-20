@@ -52,7 +52,7 @@ typedef struct {
 typedef struct {
     float Vbus;
     float Vout;
-    float temperature;
+    float internal_temperature_stm;
 
 }ADC_Voltage_Data_t;
 
@@ -118,7 +118,7 @@ typedef struct {
 
 void App_Setup(void);
 void App_Init(void);
-void App_Check_StartUp(void);
+bool App_Check_StartUp(void);
 void App_Loop(void);
 
 #endif //FATSHARKPOWER_SMART_POWER_APP_H

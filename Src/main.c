@@ -136,10 +136,11 @@ int main(void)
   DWT_Delay_Init();
   App_Setup();
   App_Init();
-  App_Check_StartUp();
+  if (!App_Check_StartUp())
+      _Error_Handler(__FILE__, __LINE__);
   //HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
   //TIM1->CR1 |= TIM_CR1_OPM;
-  HAL_TIM_Base_Start_IT(&htim2);
+  //HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 *
 
   /* Infinite loop */
