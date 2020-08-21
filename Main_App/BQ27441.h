@@ -25,7 +25,8 @@ typedef enum {
     REMAIN_UF,  // Remaining Capacity Unfiltered
     FULL_F,     // Full Capacity Filtered
     FULL_UF,    // Full Capacity Unfiltered
-    DESIGN      // Design Capacity
+    DESIGN,     // Design Capacity
+    TRUE_REMAIN //
 } capacity_measure;
 
 // Parameters for the soc() function

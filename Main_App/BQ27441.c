@@ -238,6 +238,9 @@ uint16_t BQ27441_capacity(capacity_measure type) {
         case FULL_UF:
             capacity = BQ27441_readWord(BQ27441_COMMAND_FULL_CAP_UNFL);
             break;
+        case TRUE_REMAIN:
+            capacity = BQ27441_readWord(BQ27441_COMMAND_TRUE_REM_CAP);
+            break;
         case DESIGN:
             capacity = BQ27441_readWord(BQ27441_EXTENDED_CAPACITY);
 
