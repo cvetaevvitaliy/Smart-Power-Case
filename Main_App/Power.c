@@ -147,8 +147,10 @@ void Power_BatteryTask(Device_Status_t *Data){
 
 void Power_DevicePowerOffTimer(const Device_Status_t *Data){
 
-    if (Data->time_for_auto_off != 0 && Data->ChargeChip.charging_status == 0 ) {
-        if (Data->time_for_auto_off > Data->Device_Settings.time_auto_off)
+    if (Data->time_for_auto_off != 0
+        && Data->ChargeChip.charging_status == 0
+        && Data->Device_Settings.time_auto_off != 0) {
+        if (Data->time_for_auto_off >= Data->Device_Settings.time_auto_off)
             Power_Off();
     }
 
@@ -217,7 +219,7 @@ void Power_ChargerTask(ChargeChip_t *Data){
         if (Data->vbus_type == BQ2589X_VBUS_USB_SDP  || Data->vbus_type == BQ2589X_VBUS_USB_CDP) {
             if (usb_enable == false) {
                 usb_enable = true;
-                Enable_USBDebug(true);
+                Enable_USB_Debug(true);
                 Power_USBResetGPIO();
                 Power_USBEnable(true);
                 HAL_Delay(200);
@@ -227,7 +229,7 @@ void Power_ChargerTask(ChargeChip_t *Data){
         }
 
         if (Data->vbus_type == BQ2589X_VBUS_NONE && usb_enable == true) {
-            Power_USB_Enable(false);
+            Power_USBEnable(false);
             MX_USB_DEVICE_DeInit();
             usb_enable = false;
             Enable_USB_Debug(false);
