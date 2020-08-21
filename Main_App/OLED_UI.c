@@ -382,9 +382,15 @@ static void OLED_UI_MainScreen_2(Device_Status_t *Data){
     ssd1306_Draw_Bitmap_Mono(72, 3, &Image_Remaining_Time);
 
     if (Data->Battery_Info.time_to_empty < 600)
-        sprintf(print_oled_string, " %dh%dm", (Data->Battery_Info.time_to_empty) / 60, (Data->Battery_Info.time_to_empty  % 60) );
+        sprintf(print_oled_string, " %dh%dm", (Data->Battery_Info.time_to_empty) / 60,
+                    (Data->Battery_Info.time_to_empty % 60));
     else
-        sprintf(print_oled_string, "%dh%dm", (Data->Battery_Info.time_to_empty) / 60, (Data->Battery_Info.time_to_empty  % 60) );
+        sprintf(print_oled_string, "%dh%dm", (Data->Battery_Info.time_to_empty) / 60,
+                    (Data->Battery_Info.time_to_empty % 60));
+
+    if (Data->Battery_Info.charge_flag && Data->Battery_Info.current < 650)
+        strcpy(print_oled_string, " -----");
+
     ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X, POSITION_WORK_TIME_Y, &Font_8x10);
 
 }
@@ -436,6 +442,7 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
             Settings_SetBQ27441SetMinLiionVolt(Data->Device_Settings.low_volt);
             ptr = 0;
             Data->need_calibrate = false;
+            read_settings = false;
         }
     }
 
@@ -491,6 +498,8 @@ static void OLED_UI_ScreenSetIMax (Device_Status_t *Data) {
 
     if (Data->State_Button.Button_menu_pushed ) {
         ptr++;
+        if (ptr == 5)
+            ptr = 0;
     }
 
     if (Data->State_Button.Button_select_pushed ) {
@@ -521,6 +530,7 @@ static void OLED_UI_ScreenSetIMax (Device_Status_t *Data) {
                         (set_I_max[0] * 1000) + (set_I_max[1] * 100) + (set_I_max[2] * 10) + set_I_max[3];
                 Settings_Set(&Data->Device_Settings);
                 ptr = 0;
+                read_settings = false;
                 break;
             default:
                 ptr = 0;
@@ -693,6 +703,7 @@ static void OLED_UI_ScreenSetTimeOff (Device_Status_t *Data) {
             Data->Device_Settings.time_auto_off = (uint16_t)time_minutes;
             Settings_Set(&Data->Device_Settings);
             ptr = 0;
+            read_settings = false;
         }
 
     }
@@ -766,6 +777,7 @@ static void OLED_UI_ScreenSetCapacity (Device_Status_t *Data){
             Settings_Set(&Data->Device_Settings);
             Settings_SetBQ27441SetCapacity(Data->Device_Settings.design_capacity);
             ptr = 0;
+            read_settings = false;
         }
     }
 
