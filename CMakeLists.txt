@@ -13,7 +13,7 @@ add_definitions(-DSOFTWARE_VERSION=\"${VERSION_FW}\")
 if (DEBUG STREQUAL ON)
     add_definitions(-DUSE_USB_DEBUG_PRINTF)
     set(OPTIMIZATION_LEVEL -g)
-    else()
+else()
     set(OPTIMIZATION_LEVEL -O2)
 endif()
 
@@ -23,9 +23,11 @@ foreach(MCU ${TYPE_MCU_STM})
     if (TYPE_MCU STREQUAL F103T8U)
         SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103T8Ux_FLASH.ld)
         add_definitions(-DSTM32F103T8U)
+        set(SEEK_DATA 64512)
         message(STM32F103T8U)
     else()
         add_definitions(-DSTM32F103TBU)
+        set(SEEK_DATA 130048)
         message(STM32F103TBU)
         SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
     endif()
@@ -44,7 +46,7 @@ set(SIZE arm-none-eabi-size)
 #SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
 
 SET(COMMON_FLAGS
-    "-mcpu=cortex-m3 ${FPU_FLAGS} -mthumb -mthumb-interwork -ffunction-sections -fdata-sections \
+        "-mcpu=cortex-m3 ${FPU_FLAGS} -mthumb -mthumb-interwork -ffunction-sections -fdata-sections \
     ${OPTIMIZATION_LEVEL} -fno-common -fmessage-length=0 -specs=nosys.specs -specs=nano.specs")
 
 SET(CMAKE_CXX_FLAGS_INIT "${COMMON_FLAGS} -std=c++11")
@@ -84,7 +86,7 @@ include_directories(Inc
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
 
 set(CMAKE_EXE_LINKER_FLAGS
-    "${CMAKE_EXE_LINKER_FLAGS} -Wl,-u,_printf_float,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map")
+        "${CMAKE_EXE_LINKER_FLAGS} -Wl,-u,_printf_float,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map")
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin)
@@ -99,9 +101,10 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND echo Start create Full firmware for flash via SWD
         COMMAND echo In Flash memory 0x8000000 bootloader.bin
         COMMAND echo In Flash memory 0x8000800 ${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin
+        COMMAND echo In Flash memory 0x801FC00 eeprom data for STM32F103TBU and 0x800FC00 for STM32F103T8U
         COMMAND dd if=${PROJECT_SOURCE_DIR}/bootloader.bin of=FullFW.bin bs=1 count=2048
         COMMAND dd if=${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin of=FullFW.bin bs=1 seek=2048
-        COMMAND dd if=${PROJECT_SOURCE_DIR}/eeprom.bin of=FullFW.bin bs=1 seek=130048
+        COMMAND dd if=${PROJECT_SOURCE_DIR}/eeprom.bin of=FullFW.bin bs=1 seek=${SEEK_DATA}
         COMMAND echo File FullFW.bin created complete
         COMMAND echo \"*****************************************************************\"
         COMMENT "Building ${HEX_FILE}
