@@ -6,6 +6,7 @@
 #define FATSHARKPOWER_SMART_POWER_APP_H
 #include "main.h"
 #include "stm32f1xx_hal.h"
+#include "tinyprintf.h"
 #ifdef USE_USB_DEBUG_PRINTF
 #include "usb_device.h"
 #include "printf_USB.h"
