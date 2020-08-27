@@ -110,7 +110,7 @@ void OLED_UI_Task(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_DrawFrame(void ){
+static inline void OLED_UI_DrawFrame(void ){
 
     for (uint8_t i = 0; i < 64; i++)
         if (i % 2)
@@ -267,7 +267,7 @@ static void OLED_UI_PrintMenuPage_2(Device_Status_t *Data){
 }
 
 
-static void Draw_Battery(Device_Status_t *Data) {
+static inline void Draw_Battery(Device_Status_t *Data) {
 
     uint16_t print_percent;
     static uint32_t blink_low = 0;
@@ -321,7 +321,7 @@ static void Draw_Battery(Device_Status_t *Data) {
 }
 
 
-static void OLED_UI_MainScreen_1(Device_Status_t *Data){
+static inline void OLED_UI_MainScreen_1(Device_Status_t *Data){
 
     ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Current_mAh_Ico);
     ssd1306_SetColor(Black);
@@ -357,7 +357,7 @@ static void OLED_UI_MainScreen_1(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_MainScreen_2(Device_Status_t *Data){
+static inline void OLED_UI_MainScreen_2(Device_Status_t *Data){
 
     ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Battery_Type_Ico);
     ssd1306_SetColor(Black);
