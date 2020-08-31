@@ -47,10 +47,27 @@ void Settings_SetBQ27441SetCapacity(uint16_t capacity){
         printf("BQ27441_enterConfig\n");
 #endif
         BQ27441_setCapacity(capacity);
-        BQ27441_setDesignEnergy((capacity * 3.7f));
+        BQ27441_setDesignEnergy((capacity * 3.7f));  // todo need recheck 3.7f bq27441-G1A 3.8f bq27441-G1B but need 3.6f for li-ion
+ /***********************************************************
+ *  https://datasheetspdf.com/datasheet/ICR18650-26F.html
+ *  Samsung ICR18650-26F: Li-ion type 18650
+ *  Nominal Capacity            2600mAh
+ *  Charging Voltage            4.2 ±0.05 V
+ *  Nominal Voltage             3.7V
+ *  Discharge Cut-off Voltage   2.75V
+ *  Max. Charge Current         2600mA
+ *  Max. Discharge Current      5200mA
+ ***********************************************************/
         BQ27441_setTaperRateTime(capacity / ( 0.1f * TAPER_CURRENT ) );
-        BQ27441_setTaperRateVoltage(4100);
+        BQ27441_setTaperRateVoltage(MAX_VOLTAGE_LIION - 90); // The Taper Voltage threshold defines the minimum voltage necessary as a qualifier for detection of charge termination.
+        BQ27441_setChargeVChgTermination(MAX_VOLTAGE_LIION);
         BQ27441_setTerminateVoltageMin(2950);
+ /**************************************************
+ *  todo Discharge Cut-off voltage 2950 ? 2750
+ *  needs to be fully charged and discharged battery
+ *  and and compare capacity
+ ****************************************************/
+
 
         if (BQ27441_exitConfig(true)){
 #ifdef USE_USB_DEBUG_PRINTF
