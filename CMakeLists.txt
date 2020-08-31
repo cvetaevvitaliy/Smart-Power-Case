@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.7)
 
 set(VERSION_RELEASE 1)
 set(VERSION_MAJOR 0)
-set(VERSION_MINOR 7)
+set(VERSION_MINOR 8)
 set(VERSION_FW "${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}")
 set(FIRMWARE_NAME firmware)
 
@@ -13,7 +13,7 @@ add_definitions(-DSOFTWARE_VERSION=\"${VERSION_FW}\")
 if (DEBUG STREQUAL ON)
     add_definitions(-DUSE_USB_DEBUG_PRINTF)
     set(OPTIMIZATION_LEVEL -g)
-    else()
+else()
     set(OPTIMIZATION_LEVEL -O2)
 endif()
 
@@ -50,7 +50,7 @@ set(SIZE arm-none-eabi-size)
 #SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
 
 SET(COMMON_FLAGS
-    "-mcpu=cortex-m3 ${FPU_FLAGS} -mthumb -mthumb-interwork -ffunction-sections -fdata-sections \
+        "-mcpu=cortex-m3 ${FPU_FLAGS} -mthumb -mthumb-interwork -ffunction-sections -fdata-sections \
     ${OPTIMIZATION_LEVEL} -fno-common -fmessage-length=0 -specs=nosys.specs -specs=nano.specs")
 
 SET(CMAKE_CXX_FLAGS_INIT "${COMMON_FLAGS} -std=c++11")
@@ -90,7 +90,7 @@ include_directories(Inc
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
 
 set(CMAKE_EXE_LINKER_FLAGS
-    "${CMAKE_EXE_LINKER_FLAGS} -Wl,-u,_printf_float,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map")
+        "${CMAKE_EXE_LINKER_FLAGS} -Wl,-u,_printf_float,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map")
 
 
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin)
@@ -98,17 +98,16 @@ set(BIN_FILE ${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${SIZE} --format=berkeley ${PROJECT_NAME}.elf
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
-        COMMAND echo
+        #COMMAND ${CMAKE_OBJDUMP} -x $<TARGET_FILE:${PROJECT_NAME}.elf>
         COMMAND echo \"*****************************************************************\"
         COMMAND echo Start create Full firmware for flash via SWD
-        COMMAND echo Address in Flash 0x8000000 bootloader.bin
-        COMMAND echo Address in Flash 0x8000800 ${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin
-        COMMAND echo Address in Flash ${EEPROM} eeprom.bin
+        COMMAND echo In Flash memory 0x8000000 bootloader.bin
+        COMMAND echo In Flash memory 0x8000800 ${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin
+        COMMAND echo In Flash memory 0x801FC00 eeprom data for STM32F103TBU and 0x800FC00 for STM32F103T8U
         COMMAND dd if=${PROJECT_SOURCE_DIR}/bootloader.bin of=FullFW.bin bs=1 count=2048
         COMMAND dd if=${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin of=FullFW.bin bs=1 seek=2048
         COMMAND dd if=${PROJECT_SOURCE_DIR}/eeprom.bin of=FullFW.bin bs=1 seek=${SEEK_DATA}
-        COMMAND echo \"\\033[1;34mFinish create file FullFW.bin for flash via SWD complete\\033[0m\"
-        COMMAND echo \"\\033[1;34mBut please use ${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin for update firmware via bootloader \\033[0m\"
-        COMMAND echo Full patch ${PROJECT_BINARY_DIR}/FullFW.bin
+        COMMAND echo File FullFW.bin created complete
         COMMAND echo \"*****************************************************************\"
-        COMMENT "Building complete: ${BIN_FILE}")
+        COMMENT "Building ${HEX_FILE}
+Building ${BIN_FILE}")

@@ -80,3 +80,5 @@ fabric.properties
 .osx.project
 .project
 CMakeLists_template.txt
+.idea/misc.xml
+/build/

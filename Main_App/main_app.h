@@ -6,6 +6,7 @@
 #define FATSHARKPOWER_SMART_POWER_APP_H
 #include "main.h"
 #include "stm32f1xx_hal.h"
+//#include "tinyprintf.h"
 #ifdef USE_USB_DEBUG_PRINTF
 #include "usb_device.h"
 #include "printf_USB.h"
@@ -47,12 +48,14 @@ typedef struct {
     bool Button_select_pushed;
     bool Button_menu_pressed;
     bool Button_select_pressed;
+    uint32_t time_btn_menu;
+    uint32_t time_btn_select;
 }Button_t;
 
 typedef struct {
     float Vbus;
     float Vout;
-    float temperature;
+    float internal_temperature_stm;
 
 }ADC_Voltage_Data_t;
 
@@ -82,6 +85,7 @@ typedef struct {
     uint16_t time_auto_off;
     bool buzzer_enable;
     bool Boost_mode;
+    bool locked_power_off;
 
 }Device_Settings_t;
 
@@ -105,7 +109,7 @@ typedef struct {
     Button_t State_Button;
     Device_Error_e Device_Error;
     ChargeChip_t ChargeChip;
-    uint8_t work_time_minute_auto_off;
+    uint8_t time_for_auto_off;
     uint8_t work_time_minute;
     uint8_t work_time_second;
     uint8_t work_time_hours;
@@ -118,7 +122,7 @@ typedef struct {
 
 void App_Setup(void);
 void App_Init(void);
-void App_Check_StartUp(void);
+bool App_Check_StartUp(void);
 void App_Loop(void);
 
 #endif //FATSHARKPOWER_SMART_POWER_APP_H

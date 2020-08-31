@@ -63,6 +63,11 @@ void OLED_UI_Task(Device_Status_t *Data){
 
     ssd1306_Clear();
 
+    if (Current_Menu == Current_Screen_Main_Progress)
+        Data->Device_Settings.locked_power_off = false;
+    else
+        Data->Device_Settings.locked_power_off = true;
+
     switch (Current_Menu) {
         case Current_Screen_Main_Progress:
             OLED_UI_PrintMainScreen(Data);
@@ -105,7 +110,7 @@ void OLED_UI_Task(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_DrawFrame(void ){
+static inline void OLED_UI_DrawFrame(void ){
 
     for (uint8_t i = 0; i < 64; i++)
         if (i % 2)
@@ -156,25 +161,6 @@ static void OLED_UI_DrawFrame(void ){
 
 
 static void OLED_UI_PrintMainScreen(Device_Status_t *Data){
-
-    static uint16_t counter_power_off = 0;
-    static uint32_t time_delay_counter = 0;
-
-    if (Data->State_Button.Button_select_pushed){
-        counter_power_off ++;
-        if (counter_power_off > 8) {
-            ssd1306_Draw_String("Power Off", 20, 10, &Font_8x10);
-            ssd1306_UpdateScreen();
-            TIM2->ARR = 30000;
-            HAL_TIM_Base_Start_IT(&htim2);
-            HAL_Delay(1000);
-            Power_Off();
-        }
-
-    } else if (HAL_GetTick() - time_delay_counter > 10000){
-        counter_power_off = 0;
-        time_delay_counter = HAL_GetTick();
-    }
 
     if (Data->State_Button.Button_menu_pushed)
         Current_Menu = Current_Screen_Menu_Page_1;
@@ -281,7 +267,7 @@ static void OLED_UI_PrintMenuPage_2(Device_Status_t *Data){
 }
 
 
-static void Draw_Battery(Device_Status_t *Data) {
+static inline void Draw_Battery(Device_Status_t *Data) {
 
     uint16_t print_percent;
     static uint32_t blink_low = 0;
@@ -335,7 +321,7 @@ static void Draw_Battery(Device_Status_t *Data) {
 }
 
 
-static void OLED_UI_MainScreen_1(Device_Status_t *Data){
+static inline void OLED_UI_MainScreen_1(Device_Status_t *Data){
 
     ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Current_mAh_Ico);
     ssd1306_SetColor(Black);
@@ -371,7 +357,7 @@ static void OLED_UI_MainScreen_1(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_MainScreen_2(Device_Status_t *Data){
+static inline void OLED_UI_MainScreen_2(Device_Status_t *Data){
 
     ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Battery_Type_Ico);
     ssd1306_SetColor(Black);
@@ -395,11 +381,35 @@ static void OLED_UI_MainScreen_2(Device_Status_t *Data){
     ssd1306_SetColor(White);
     ssd1306_Draw_Bitmap_Mono(72, 3, &Image_Remaining_Time);
 
-    if (Data->Battery_Info.time_to_empty < 600)
-        sprintf(print_oled_string, " %dh%dm", (Data->Battery_Info.time_to_empty) / 60, (Data->Battery_Info.time_to_empty  % 60) );
-    else
-        sprintf(print_oled_string, "%dh%dm", (Data->Battery_Info.time_to_empty) / 60, (Data->Battery_Info.time_to_empty  % 60) );
-    ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X, POSITION_WORK_TIME_Y, &Font_8x10);
+    if (Data->Battery_Info.power > 0) {
+        if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP)
+            ssd1306_Draw_Bitmap_Mono(72, 3, &Image_USB_Ico);
+        else if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_DCP)
+            ssd1306_Draw_Bitmap_Mono(72, 3, &Image_5V_Ico);
+        else if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_MAXC)
+            ssd1306_Draw_Bitmap_Mono(72, 3, &Image_QC_Ico);
+        else if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_UNKNOWN ||
+                 Data->ChargeChip.vbus_type == BQ2589X_VBUS_NONSTAND)
+            ssd1306_Draw_Bitmap_Mono(72, 3, &Image_Err_Ico);
+
+        sprintf(print_oled_string, "%.1fW", Data->Battery_Info.power * 0.001f);
+
+        ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X + 5, POSITION_WORK_TIME_Y, &Font_8x10);
+
+    } else {
+        if (Data->Battery_Info.time_to_empty < 600)
+            sprintf(print_oled_string, " %dh%dm", (Data->Battery_Info.time_to_empty) / 60,
+                    (Data->Battery_Info.time_to_empty % 60));
+        else
+            sprintf(print_oled_string, "%dh%dm", (Data->Battery_Info.time_to_empty) / 60,
+                    (Data->Battery_Info.time_to_empty % 60));
+
+        if (Data->Battery_Info.charge_flag && Data->Battery_Info.current < 650)
+            strcpy(print_oled_string, " -----");
+
+        ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X, POSITION_WORK_TIME_Y, &Font_8x10);
+    }
+
 
 }
 
@@ -447,9 +457,10 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
 
             Data->Device_Settings.low_volt = (first_position * 100) + (second_position * 10) + third_position;
             Settings_Set(&Data->Device_Settings);
-            Settings_Set_BQ27441_Set_Min_Liion_Volt(Data->Device_Settings.low_volt);
+            Settings_SetMinVoltPowerOff(Data->Device_Settings.low_volt);
             ptr = 0;
             Data->need_calibrate = false;
+            read_settings = false;
         }
     }
 
@@ -505,6 +516,8 @@ static void OLED_UI_ScreenSetIMax (Device_Status_t *Data) {
 
     if (Data->State_Button.Button_menu_pushed ) {
         ptr++;
+        if (ptr == 5)
+            ptr = 0;
     }
 
     if (Data->State_Button.Button_select_pushed ) {
@@ -535,6 +548,7 @@ static void OLED_UI_ScreenSetIMax (Device_Status_t *Data) {
                         (set_I_max[0] * 1000) + (set_I_max[1] * 100) + (set_I_max[2] * 10) + set_I_max[3];
                 Settings_Set(&Data->Device_Settings);
                 ptr = 0;
+                read_settings = false;
                 break;
             default:
                 ptr = 0;
@@ -607,9 +621,9 @@ static void OLED_UI_ScreenSetVout (Device_Status_t *Data){
         if (ptr == 2) {
             Current_Menu = Current_Screen_Menu_Page_1;
             if (Data->Device_Settings.Boost_mode == Boost_12V)
-                Power_Boost_Enable_12V(true);
+                Power_BoostEnable12V(true);
             else
-                Power_Boost_Enable_12V(false);
+                Power_BoostEnable12V(false);
             Settings_Set(&Data->Device_Settings);
             ptr = 0;
         }
@@ -707,6 +721,7 @@ static void OLED_UI_ScreenSetTimeOff (Device_Status_t *Data) {
             Data->Device_Settings.time_auto_off = (uint16_t)time_minutes;
             Settings_Set(&Data->Device_Settings);
             ptr = 0;
+            read_settings = false;
         }
 
     }
@@ -778,8 +793,9 @@ static void OLED_UI_ScreenSetCapacity (Device_Status_t *Data){
 
             Data->Device_Settings.design_capacity = (set_capacity[0] * 1000) + (set_capacity[1] * 100) + (set_capacity[2] * 10) + set_capacity[3];
             Settings_Set(&Data->Device_Settings);
-            Settings_Set_BQ27441_Set_Capacity(Data->Device_Settings.design_capacity);
+            Settings_SetBQ27441SetCapacity(Data->Device_Settings.design_capacity);
             ptr = 0;
+            read_settings = false;
         }
     }
 

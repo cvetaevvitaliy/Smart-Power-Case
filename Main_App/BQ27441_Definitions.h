@@ -42,7 +42,8 @@
 #define BQ27441_COMMAND_REM_CAP_FIL		0x2A // RemainingCapacityFiltered()
 #define BQ27441_COMMAND_FULL_CAP_UNFL	0x2C // FullChargeCapacityUnfiltered()
 #define BQ27441_COMMAND_FULL_CAP_FIL	0x2E // FullChargeCapacityFiltered()
-#define BQ27441_COMMAND_SOC_UNFL		0x30 // StateOfChargeUnfiltered()
+#define BQ27441_COMMAND_SOC_UNFL        0x30 // StateOfChargeUnfiltered()
+#define BQ27441_COMMAND_TRUE_REM_CAP    0x6A // TrueRemainingCapacity()
 
 /********************************
  * Control Sub-commands

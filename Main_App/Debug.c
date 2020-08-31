@@ -1,10 +1,11 @@
 //
 // Created by Vitaliy on 6/4/20.
 //
+#ifdef USE_USB_DEBUG_PRINTF
 #include "Debug.h"
 
 void Debug_Task(Device_Status_t *Data){
-#ifdef USE_USB_DEBUG_PRINTF
+
     static uint32_t time_task = 0;
 
     if (HAL_GetTick() - time_task > 500){
@@ -14,7 +15,7 @@ void Debug_Task(Device_Status_t *Data){
 
         printf("variable time_delay_task = %lums\n\r", HAL_GetTick() - tmp);
         printf("Work Time = %dh:%dm:%ds\n\r",Data->work_time_hours,Data->work_time_minute,Data->work_time_second);
-        printf("Battery_Info.temperature = %.2fC\n\r",Data->Battery_Info.temperature);
+        printf("Battery_Info.internal_temperature_stm = %.2fC\n\r",Data->Battery_Info.temperature);
         printf("Battery_Info.Vbat = %.2fV\n\r",Data->Battery_Info.Vbat);
         printf("Battery_Info.capacity = %dmA*H\n\r",Data->Battery_Info.capacity);
         printf("Battery_Info.capacity_full = %dmA*H\n\r",Data->Battery_Info.capacity_full);
@@ -28,9 +29,10 @@ void Debug_Task(Device_Status_t *Data){
         printf("Battery_Info.fast_charge = %d\n\r",Data->Battery_Info.fast_charge);
         printf("Battery_Info.battery_discharging = %d\n\r",Data->Battery_Info.battery_discharging);
         printf("Data->Device_Settings.low_volt = %d\n\r",Data->Device_Settings.low_volt);
-        printf("Data->work_time_minute_auto_off = %d\n\r",Data->work_time_minute_auto_off);
+        printf("Data->time_for_auto_off = %d\n\r",Data->time_for_auto_off);
+        printf("Data->Device_Settings.time_auto_off = %d\n\r",Data->Device_Settings.time_auto_off);
 
 
     }
-#endif
 }
+#endif

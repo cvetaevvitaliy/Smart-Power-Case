@@ -3,63 +3,72 @@
 ********************************/
 #include "button.h"
 
-#define DEBOUNCE_DELAY                 3
+#define DELAY_PUSHED                    350
+#define DELAY_KEY_PUSHED_POWER_OFF      3500
 
 extern TIM_HandleTypeDef htim2;
 
-typedef struct State_Button {
-    bool Button1;
-    bool Button2;
-    uint16_t counter_button1;
-    uint16_t counter_button2;
+static struct State_Button {
+    bool button_menu;
+    bool button_select;
+    bool button_beep;
+    uint32_t time_btn_menu;
+    uint32_t time_btn_select;
 }State_Button_t;
 
-static State_Button_t State_Button = {0};
+static void BeepEvent(void){
+
+    if (State_Button_t.button_beep) {
+        TIM2->ARR = 2000;
+        HAL_TIM_Base_Start_IT(&htim2);
+    }
+}
 
 void Button_Task(Button_t *Data, const Device_Settings_t *Settings) {
 
+    static uint32_t time_power_off = 0;
+    static bool start_delay = false;
 
-    State_Button.Button1 = HAL_GPIO_ReadPin (Button1_GPIO_Port, Button1_Pin);
-    State_Button.Button2 = HAL_GPIO_ReadPin (Button2_GPIO_Port, Button2_Pin);
+    Data->Button_menu_pushed = State_Button_t.button_menu;
+    Data->Button_select_pushed = State_Button_t.button_select;
 
-
-    if (State_Button.Button1 == true){
-        State_Button.counter_button1++;
+    if (HAL_GetTick() - State_Button_t.time_btn_menu < DELAY_PUSHED) {
+        State_Button_t.button_menu = false;
+    }
+    if (HAL_GetTick() - State_Button_t.time_btn_select < DELAY_PUSHED) {
+        State_Button_t.button_select = false;
     }
 
-    if (State_Button.Button1 == false && State_Button.counter_button1 > 0)
-        if (State_Button.counter_button1 != 0) {
-            State_Button.counter_button1--;
-        }
+    if (State_Button_t.button_beep != Settings->buzzer_enable)
+        State_Button_t.button_beep = Settings->buzzer_enable;
 
-    if (State_Button.counter_button1 >= DEBOUNCE_DELAY) {
-        State_Button.counter_button1 = 0;
-        Data->Button_menu_pushed = true;
-        if (Settings->buzzer_enable == true) {
-            //TIM2->ARR = 2000;
-            //HAL_TIM_Base_Start_IT(&htim2);
-        }
+    if (!Settings->locked_power_off) {
+        if (!HAL_GPIO_ReadPin(ButtonSelect_GPIO_Port, Button_Select_Pin) && !start_delay) {
+            time_power_off = HAL_GetTick();
+            start_delay = true;
+        } else
+            start_delay = false;
+
+        if (HAL_GetTick() - time_power_off > DELAY_KEY_PUSHED_POWER_OFF)
+            Power_Off();
     } else
-        Data->Button_menu_pushed = false;
-
-
-
-
-    if (State_Button.Button2 == true)
-        State_Button.counter_button2++;
-    if (State_Button.Button2 == false && State_Button.counter_button2 > 0)
-        if (State_Button.counter_button2 != 0)
-            State_Button.counter_button2--;
-
-    if (State_Button.counter_button2 >= DEBOUNCE_DELAY) {
-        State_Button.counter_button2 = 0;
-        Data->Button_select_pushed = true;
-        if (Settings->buzzer_enable == true) {
-            //TIM2->ARR = 2000;
-            //HAL_TIM_Base_Start_IT(&htim2);
-        }
-    } else
-        Data->Button_select_pushed = false;
-
+        time_power_off = HAL_GetTick();
 
 }
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+
+    if (GPIO_Pin == Button_Menu_Pin && !State_Button_t.button_menu){
+        State_Button_t.button_menu = true;
+        State_Button_t.time_btn_menu = HAL_GetTick();
+    }
+
+    if (GPIO_Pin == Button_Select_Pin && !State_Button_t.button_select){
+        State_Button_t.button_select = true;
+        State_Button_t.time_btn_select = HAL_GetTick();
+    }
+    BeepEvent();
+}
+
+
