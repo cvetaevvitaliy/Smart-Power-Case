@@ -25,10 +25,14 @@ foreach(MCU ${TYPE_MCU_STM})
         add_definitions(-DSTM32F103T8U)
         set(SEEK_DATA 64512)
         message(STM32F103T8U)
+        set(MCU STM32F103T8U)
+        set(EEPROM 0x800FC00)
     else()
         add_definitions(-DSTM32F103TBU)
         set(SEEK_DATA 130048)
         message(STM32F103TBU)
+        set(MCU STM32F103TBU)
+        set(EEPROM 0x801FC00)
         SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
     endif()
 endforeach()
@@ -88,13 +92,11 @@ add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
 set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} -Wl,-u,_printf_float,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map")
 
-set(HEX_FILE ${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.hex)
+
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin)
 
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-        #COMMAND ${SIZE} --format=SysV ${PROJECT_NAME}.elf
         COMMAND ${SIZE} --format=berkeley ${PROJECT_NAME}.elf
-        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
         #COMMAND ${CMAKE_OBJDUMP} -x $<TARGET_FILE:${PROJECT_NAME}.elf>
         COMMAND echo \"*****************************************************************\"
