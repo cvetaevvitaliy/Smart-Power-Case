@@ -48,6 +48,8 @@ typedef struct {
     bool Button_select_pushed;
     bool Button_menu_pressed;
     bool Button_select_pressed;
+    uint32_t time_btn_menu;
+    uint32_t time_btn_select;
 }Button_t;
 
 typedef struct {

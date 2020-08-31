@@ -7,6 +7,8 @@
 #include "stm32f1xx_hal.h"
 #include "main_app.h"
 
+#define TAPER_CURRENT              100
+
 void Power_OLEDOn(bool state);
 void Power_BoostEnable(bool state);
 void Power_BoostEnable12V(bool state);

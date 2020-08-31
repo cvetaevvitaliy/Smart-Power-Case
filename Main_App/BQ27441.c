@@ -40,8 +40,8 @@ static bool BQ27441_writeExtendedData (uint8_t classID, uint8_t offset, uint8_t 
 static int16_t BQ27441_i2cReadBytes (uint8_t subAddress, uint8_t *dest, uint8_t count);
 static uint16_t BQ27441_i2cWriteBytes (uint8_t subAddress, uint8_t *src, uint8_t count);
 
-static bool sealFlag = false; // Global to identify that IC was previously sealed
-static bool userConfigControl = false; // Global to identify that user has control over
+static volatile bool sealFlag = false; // Global to identify that IC was previously sealed
+static volatile bool userConfigControl = false; // Global to identify that user has control over
 
 static uint8_t constrain(const uint8_t x, const uint8_t a, const uint8_t b);
 
@@ -56,12 +56,14 @@ static uint8_t constrain(const uint8_t x, const uint8_t a, const uint8_t b);
 bool BQ27441_init(void) {
     if (HAL_I2C_IsDeviceReady(&BQ27441_I2C_PORT, (BQ72441_I2C_ADDRESS << 1), 5, 50) != HAL_OK)
         return false;
+    else
+        return true;
 
-    if (BQ27441_deviceType() == BQ27441_DEVICE_ID) { // Read deviceType from BQ27441
-        return true; // If device ID is valid, return true
-    }
+//    if (BQ27441_deviceType() == BQ27441_DEVICE_ID) { // Read deviceType from BQ27441
+//        return true; // If device ID is valid, return true
+//    }
 
-    return false; // Otherwise return false
+    //return false; // Otherwise return false
 }
 
 /**
@@ -145,8 +147,9 @@ bool BQ27441_setTaperRateTime(uint16_t rate) {
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x1B (27)
     // Termiante voltage is a 2-byte piece of data - MSB first
-    // Unit: 0.1h
+    // Unit: 0.1 Hr
     // Max 2000
+    // default 100
     if (rate > 2000)
         rate = 2000;
 
@@ -158,8 +161,9 @@ bool BQ27441_setTaperRateVoltage(uint16_t voltage) {
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x1B (27)
     // Termiante voltage is a 2-byte piece of data - MSB first
-    // Unit: 0.1h
+    // Unit: mV
     // Max 2000
+    // default 4100
     if (voltage > 5000)
         voltage = 5000;
 
@@ -537,6 +541,13 @@ bool BQ27441_itporFlag(void)
     return flagState & BQ27441_FLAG_ITPOR;
 }
 
+bool BQ27441_initComp(void){
+
+    uint16_t stat = BQ27441_status();
+    return stat & BQ27441_STATUS_INITCOMP;
+
+}
+
 /**
     Check if the FC flag is set in flags()
 
@@ -638,7 +649,7 @@ uint16_t BQ27441_deviceType(void)
     @return true on success
 */
 bool BQ27441_enterConfig(bool userControl) {
-    userControl = true;
+
     if (userControl) {
         userConfigControl = true;
 
@@ -650,14 +661,14 @@ bool BQ27441_enterConfig(bool userControl) {
         if (BQ27441_executeControlWord(BQ27441_CONTROL_SET_CFGUPDATE)) {
             int16_t timeout = BQ72441_I2C_TIMEOUT;
             while ((timeout--) && (!(BQ27441_flags() & BQ27441_FLAG_CFGUPMODE)))
-                HAL_Delay(1);
+                HAL_Delay(10);
 
             if (timeout > 0)
                 return true;
-        }
-    }
-
-    return false;
+        } else
+            return false;
+    } else
+        return false;
 }
 
 /**
@@ -780,7 +791,7 @@ bool BQ27441_softReset(void) {
 void BQ27441_Full_Reset(void) {
     BQ27441_enterConfig(true);
     BQ27441_executeControlWord(BQ27441_CONTROL_RESET);
-    BQ27441_exitConfig(false);
+    BQ27441_exitConfig(true);
 
 }
 

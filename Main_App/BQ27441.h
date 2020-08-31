@@ -6,7 +6,7 @@
 #include "BQ27441_Definitions.h"
 #include "main_app.h"
 
-#define BQ72441_I2C_TIMEOUT 2000
+#define BQ72441_I2C_TIMEOUT 20000
 
 // Parameters for the current() function, to specify which current to read
 typedef enum {
@@ -98,6 +98,7 @@ bool BQ27441_setSOCFThresholds (uint8_t set, uint8_t clear);
 bool BQ27441_socFlag (void);
 bool BQ27441_socfFlag (void);
 bool BQ27441_itporFlag (void);
+bool BQ27441_initComp(void);
 bool BQ27441_fcFlag (void);
 bool BQ27441_chgFlag (void);
 bool BQ27441_dsgFlag (void);

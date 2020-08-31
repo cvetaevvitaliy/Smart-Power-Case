@@ -381,17 +381,35 @@ static inline void OLED_UI_MainScreen_2(Device_Status_t *Data){
     ssd1306_SetColor(White);
     ssd1306_Draw_Bitmap_Mono(72, 3, &Image_Remaining_Time);
 
-    if (Data->Battery_Info.time_to_empty < 600)
-        sprintf(print_oled_string, " %dh%dm", (Data->Battery_Info.time_to_empty) / 60,
+    if (Data->Battery_Info.power > 0) {
+        if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_SDP || Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_CDP)
+            ssd1306_Draw_Bitmap_Mono(72, 3, &Image_USB_Ico);
+        else if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_USB_DCP)
+            ssd1306_Draw_Bitmap_Mono(72, 3, &Image_5V_Ico);
+        else if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_MAXC)
+            ssd1306_Draw_Bitmap_Mono(72, 3, &Image_QC_Ico);
+        else if (Data->ChargeChip.vbus_type == BQ2589X_VBUS_UNKNOWN ||
+                 Data->ChargeChip.vbus_type == BQ2589X_VBUS_NONSTAND)
+            ssd1306_Draw_Bitmap_Mono(72, 3, &Image_Err_Ico);
+
+        sprintf(print_oled_string, "%.1fW", Data->Battery_Info.power * 0.001f);
+
+        ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X + 5, POSITION_WORK_TIME_Y, &Font_8x10);
+
+    } else {
+        if (Data->Battery_Info.time_to_empty < 600)
+            sprintf(print_oled_string, " %dh%dm", (Data->Battery_Info.time_to_empty) / 60,
                     (Data->Battery_Info.time_to_empty % 60));
-    else
-        sprintf(print_oled_string, "%dh%dm", (Data->Battery_Info.time_to_empty) / 60,
+        else
+            sprintf(print_oled_string, "%dh%dm", (Data->Battery_Info.time_to_empty) / 60,
                     (Data->Battery_Info.time_to_empty % 60));
 
-    if (Data->Battery_Info.charge_flag && Data->Battery_Info.current < 650)
-        strcpy(print_oled_string, " -----");
+        if (Data->Battery_Info.charge_flag && Data->Battery_Info.current < 650)
+            strcpy(print_oled_string, " -----");
 
-    ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X, POSITION_WORK_TIME_Y, &Font_8x10);
+        ssd1306_Draw_String(print_oled_string, POSITION_WORK_TIME_X, POSITION_WORK_TIME_Y, &Font_8x10);
+    }
+
 
 }
 
@@ -439,7 +457,7 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
 
             Data->Device_Settings.low_volt = (first_position * 100) + (second_position * 10) + third_position;
             Settings_Set(&Data->Device_Settings);
-            Settings_SetBQ27441SetMinLiionVolt(Data->Device_Settings.low_volt);
+            Settings_SetMinVoltPowerOff(Data->Device_Settings.low_volt);
             ptr = 0;
             Data->need_calibrate = false;
             read_settings = false;

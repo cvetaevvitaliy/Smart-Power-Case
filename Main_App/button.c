@@ -3,8 +3,8 @@
 ********************************/
 #include "button.h"
 
-#define DELAY_PUSHED                    200
-#define DELAY_KEY_PUSHED_POWER_OFF      4500
+#define DELAY_PUSHED                    350
+#define DELAY_KEY_PUSHED_POWER_OFF      3500
 
 extern TIM_HandleTypeDef htim2;
 
@@ -21,32 +21,26 @@ static void BeepEvent(void){
     if (State_Button_t.button_beep) {
         TIM2->ARR = 2000;
         HAL_TIM_Base_Start_IT(&htim2);
-        State_Button_t.time_btn_menu = HAL_GetTick();
     }
 }
 
-static void BounceButton (Button_t *Data){
-
-    Data->Button_menu_pushed = State_Button_t.button_menu;
-    Data->Button_select_pushed = State_Button_t.button_select;
-
-    if (HAL_GetTick() - State_Button_t.time_btn_menu < DELAY_PUSHED)
-        State_Button_t.button_menu = false;
-    if (HAL_GetTick() - State_Button_t.time_btn_select < DELAY_PUSHED)
-        State_Button_t.button_select = false;
-
-}
-
-void Button_Task(Button_t *Data, const Device_Settings_t *Settings, uint8_t* time) {
+void Button_Task(Button_t *Data, const Device_Settings_t *Settings) {
 
     static uint32_t time_power_off = 0;
     static bool start_delay = false;
 
-    State_Button_t.button_beep = Settings->buzzer_enable;
-    BounceButton(Data);
+    Data->Button_menu_pushed = State_Button_t.button_menu;
+    Data->Button_select_pushed = State_Button_t.button_select;
 
-    if (State_Button_t.button_select && State_Button_t.button_menu)
-        time = 0;
+    if (HAL_GetTick() - State_Button_t.time_btn_menu < DELAY_PUSHED) {
+        State_Button_t.button_menu = false;
+    }
+    if (HAL_GetTick() - State_Button_t.time_btn_select < DELAY_PUSHED) {
+        State_Button_t.button_select = false;
+    }
+
+    if (State_Button_t.button_beep != Settings->buzzer_enable)
+        State_Button_t.button_beep = Settings->buzzer_enable;
 
     if (!Settings->locked_power_off) {
         if (!HAL_GPIO_ReadPin(ButtonSelect_GPIO_Port, Button_Select_Pin) && !start_delay) {
@@ -65,17 +59,16 @@ void Button_Task(Button_t *Data, const Device_Settings_t *Settings, uint8_t* tim
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
-    if (GPIO_Pin == Button_Menu_Pin){
-        BeepEvent();
+    if (GPIO_Pin == Button_Menu_Pin && !State_Button_t.button_menu){
         State_Button_t.button_menu = true;
         State_Button_t.time_btn_menu = HAL_GetTick();
     }
 
-    if (GPIO_Pin == Button_Select_Pin){
-        BeepEvent();
+    if (GPIO_Pin == Button_Select_Pin && !State_Button_t.button_select){
         State_Button_t.button_select = true;
         State_Button_t.time_btn_select = HAL_GetTick();
     }
+    BeepEvent();
 }
 
 

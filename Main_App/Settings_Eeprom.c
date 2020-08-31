@@ -28,11 +28,11 @@ void Settings_Set(Device_Settings_t *Data){
 
 
 void Settings_SetDefault(Device_Settings_t *Data) {
-    Data->current_max = 666;
+    Data->current_max = 2000;
     Data->low_volt = 332;
-    Data->design_capacity = 2540;
+    Data->design_capacity = 5000;
     Data->Boost_mode = Boost_8V;
-    Data->time_auto_off = 4440;
+    Data->time_auto_off = 0;
     Data->buzzer_enable = false;
     Data->Boost_mode = false;
     Settings_Set(Data);
@@ -41,44 +41,35 @@ void Settings_SetDefault(Device_Settings_t *Data) {
 
 void Settings_SetBQ27441SetCapacity(uint16_t capacity){
 
-    BQ27441_Full_Reset();
 
     if (BQ27441_enterConfig(true)){
+#ifdef USE_USB_DEBUG_PRINTF
         printf("BQ27441_enterConfig\n");
-
-        BQ27441_CLEAR_HIBERNATE();
-        BQ27441_setHibernateCurrent(0);
-        BQ27441_set_BI_PU_EN(false);
-        BQ27441_setSLEEPenable(false);
-        BQ27441_setGPOUTFunction(BAT_LOW);
+#endif
         BQ27441_setCapacity(capacity);
-        BQ27441_setDesignEnergy((uint16_t)(capacity * 3.6f));
-        BQ27441_setTaperRateTime(capacity / 22);
+        BQ27441_setDesignEnergy((capacity * 3.7f));
+        BQ27441_setTaperRateTime(capacity / ( 0.1f * TAPER_CURRENT ) );
+        BQ27441_setTaperRateVoltage(4100);
+        BQ27441_setTerminateVoltageMin(2850);
 
         if (BQ27441_exitConfig(true)){
+#ifdef USE_USB_DEBUG_PRINTF
             printf("BQ27441_exitConfig\n");
-        } else
+#endif
+        } else {
+#ifdef USE_USB_DEBUG_PRINTF
             printf("BQ27441_exitConfig false\n");
-    } else
+#endif
+        }
+    } else {
+#ifdef USE_USB_DEBUG_PRINTF
         printf("BQ27441_enterConfig false\n");
-    BQ27441_exitConfig(false);
+#endif
+    }
 
 }
 
 
-void Settings_SetBQ27441SetMinLiionVolt(uint16_t volt){
+void Settings_SetMinVoltPowerOff(uint16_t volt){
     bq2589x_set_bat_limit(volt);
-    if (BQ27441_enterConfig(true)){
-        printf("BQ27441_enterConfig\n");
-        BQ27441_setTerminateVoltageMin(volt);
-        BQ27441_setChargeTermination(4114);
-        //BQ27441_setTaperRateVoltage(4030);
-        if (BQ27441_exitConfig(true)){
-            printf("BQ27441_exitConfig\n");
-        } else
-            printf("BQ27441_exitConfig false\n");
-    } else
-        printf("BQ27441_enterConfig false\n");
-    BQ27441_exitConfig(false);
-
 }

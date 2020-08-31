@@ -11,6 +11,9 @@
 #include "Debug.h"
 #endif
 
+#define MAGIC_BKP_VALUE_BOOT                   ((uint32_t)0x424C) /// this value for write to BKP RTC register, to enable bootloader after reboot
+#define MAGIC_BKP_VALUE_BQ                     ((uint32_t)0x425C)
+
 extern DMA_HandleTypeDef hdma_adc1;
 extern I2C_HandleTypeDef hi2c1;
 extern RTC_HandleTypeDef hrtc;
@@ -99,18 +102,27 @@ bool App_Check_StartUp(void){
         else
             Power_BoostEnable12V(false);
     }
+
+    if (HAL_RTCEx_BKUPRead(&hrtc, 8) != MAGIC_BKP_VALUE_BQ){
+        HAL_RTCEx_BKUPWrite(&hrtc, 8, MAGIC_BKP_VALUE_BQ);
+        ssd1306_Draw_String("Reset BQ27441", 0, 0, &Font_8x10);
+        ssd1306_UpdateScreen();
+        BQ27441_Full_Reset();
+        HAL_Delay(5000);
+    }
+
+
     if (BQ27441_itporFlag() ) {
         ssd1306_Draw_String("Find NEW BAT", 0, 0, &Font_8x10);
         ssd1306_Draw_String("Please", 0, 10, &Font_8x10);
         ssd1306_Draw_String("Recalibrate", 0, 20, &Font_8x10);
         ssd1306_UpdateScreen();
         Device_Status.need_calibrate = true;
-        //HAL_RTCEx_BKUPWrite(&hrtc,1,1);
         HAL_Delay(2000);
     } else {
         Device_Status.need_calibrate = false;
-        BQ27441_CLEAR_HIBERNATE();
-        Settings_SetBQ27441SetMinLiionVolt((Device_Status.Device_Settings.low_volt * 10));
+        //BQ27441_CLEAR_HIBERNATE();
+        //Settings_SetMinLiionVoltPowerOff((Device_Status.Device_Settings.low_volt * 10));
     }
     return true;
 
@@ -121,7 +133,7 @@ void App_Loop(void){
 
     Time_Task(&Device_Status);
     ADC_Task(&Device_Status.ADC_Data);
-    Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings, &Device_Status.time_for_auto_off);
+    Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings);
     OLED_UI_Task(&Device_Status);
     Power_BatteryTask(&Device_Status);
     Power_ChargerTask(&Device_Status.ChargeChip);
@@ -164,8 +176,8 @@ static void Enter_DFU_Mode(Device_Status_t *Data){
             Data->ADC_Data.Vbus = 0;
             ssd1306_Draw_String("DFU 3.0", 30, 10, &Font_8x10);
             ssd1306_UpdateScreen();
-            uint16_t data = 0x424C;
-            HAL_RTCEx_BKUPWrite(&hrtc, 4, (uint32_t) data);
+            //uint16_t data = 0x424C;
+            HAL_RTCEx_BKUPWrite(&hrtc, 4, MAGIC_BKP_VALUE_BOOT);
             HAL_Delay(1000);
             NVIC_SystemReset();
         } else {
