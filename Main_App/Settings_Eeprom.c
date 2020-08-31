@@ -50,7 +50,7 @@ void Settings_SetBQ27441SetCapacity(uint16_t capacity){
         BQ27441_setDesignEnergy((capacity * 3.7f));
         BQ27441_setTaperRateTime(capacity / ( 0.1f * TAPER_CURRENT ) );
         BQ27441_setTaperRateVoltage(4100);
-        BQ27441_setTerminateVoltageMin(2850);
+        BQ27441_setTerminateVoltageMin(2950);
 
         if (BQ27441_exitConfig(true)){
 #ifdef USE_USB_DEBUG_PRINTF
