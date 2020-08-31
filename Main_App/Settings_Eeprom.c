@@ -47,7 +47,7 @@ void Settings_SetBQ27441SetCapacity(uint16_t capacity){
         printf("BQ27441_enterConfig\n");
 #endif
         BQ27441_setCapacity(capacity);
-        BQ27441_setDesignEnergy((capacity * 3.7f));  // todo need recheck 3.7f bq27441-G1A 3.8f bq27441-G1B but need 3.6f for li-ion
+        BQ27441_setDesignEnergy((capacity * 3.7f));  // 3.7f bq27441-G1A 3.8f bq27441-G1B
  /***********************************************************
  *  https://datasheetspdf.com/datasheet/ICR18650-26F.html
  *  Samsung ICR18650-26F: Li-ion type 18650
