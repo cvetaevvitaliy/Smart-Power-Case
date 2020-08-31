@@ -130,7 +130,8 @@ bool BQ27441_setTerminateVoltageMin(uint16_t voltage) {
     return BQ27441_writeExtendedData(BQ27441_ID_STATE, 16, tvData, 2);
 }
 
-bool BQ27441_setChargeTermination(uint16_t voltage){
+bool BQ27441_setChargeVChgTermination(uint16_t voltage){
+    // V at Chg Term
     // Write to STATE subclass (82) of BQ27441 extended memory.
     // Offset 0x21 (33)
     // Termiante voltage is a 2-byte piece of data - MSB first

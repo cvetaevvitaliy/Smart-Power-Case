@@ -8,6 +8,7 @@
 #include "main_app.h"
 
 #define TAPER_CURRENT              100
+#define MAX_VOLTAGE_LIION          4200
 
 void Power_OLEDOn(bool state);
 void Power_BoostEnable(bool state);
