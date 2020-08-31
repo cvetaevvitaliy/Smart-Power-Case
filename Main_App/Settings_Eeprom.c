@@ -68,7 +68,7 @@ void Settings_SetBQ27441SetCapacity(uint16_t capacity){
  *  and and compare capacity
  ****************************************************/
 
-
+      
         if (BQ27441_exitConfig(true)){
 #ifdef USE_USB_DEBUG_PRINTF
             printf("BQ27441_exitConfig\n");
