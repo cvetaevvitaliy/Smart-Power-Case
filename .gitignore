@@ -81,3 +81,4 @@ fabric.properties
 .project
 CMakeLists_template.txt
 .idea/misc.xml
+/build/
