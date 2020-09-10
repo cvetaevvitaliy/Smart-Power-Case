@@ -176,7 +176,6 @@ static void Enter_DFU_Mode(Device_Status_t *Data){
             Data->ADC_Data.Vbus = 0;
             ssd1306_Draw_String("DFU 3.0", 30, 10, &Font_8x10);
             ssd1306_UpdateScreen();
-            //uint16_t data = 0x424C;
             HAL_RTCEx_BKUPWrite(&hrtc, 4, MAGIC_BKP_VALUE_BOOT);
             HAL_Delay(1000);
             NVIC_SystemReset();
