@@ -190,7 +190,7 @@ bool Power_ChargerInit(void){
         bq2589x_adc_start(true);
         bq2589x_set_prechg_current(1024);
         bq2589x_set_bat_limit(2800);
-        bq2589x_set_chargevoltage(MAX_VOLTAGE_LIION + 10); // +10mV drop on wires
+        bq2589x_set_chargevoltage(MAX_VOLTAGE_LIION); // +1mV drop on wires
         bq2589x_set_term_current(TAPER_CURRENT);
         //bq2589x_set_IR_compensation_resistor(1);
         bq2589x_enable_max_charge(true);

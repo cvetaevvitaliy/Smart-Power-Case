@@ -7,8 +7,8 @@
 #include "stm32f1xx_hal.h"
 #include "main_app.h"
 
-#define TAPER_CURRENT              100
-#define MAX_VOLTAGE_LIION          4200
+#define TAPER_CURRENT              150      // Current cut-off charging for BQ25895 and BQ27441
+#define MAX_VOLTAGE_LIION          4200     // Max charge voltage for battery
 
 void Power_OLEDOn(bool state);
 void Power_BoostEnable(bool state);

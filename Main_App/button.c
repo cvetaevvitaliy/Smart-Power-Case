@@ -3,12 +3,11 @@
 ********************************/
 #include "button.h"
 
-#define DELAY_PUSHED                    350
 #define DELAY_KEY_PUSHED_POWER_OFF      3500
 
 extern TIM_HandleTypeDef htim2;
 
-static struct State_Button {
+static struct {
     bool button_menu;
     bool button_select;
     bool button_beep;
@@ -29,14 +28,20 @@ void Button_Task(Button_t *Data, const Device_Settings_t *Settings) {
     static uint32_t time_power_off = 0;
     static bool start_delay = false;
 
+    /**  todo: need refactor   */
     Data->Button_menu_pushed = State_Button_t.button_menu;
     Data->Button_select_pushed = State_Button_t.button_select;
 
-    if (HAL_GetTick() - State_Button_t.time_btn_menu < DELAY_PUSHED) {
+    if (State_Button_t.button_menu){
         State_Button_t.button_menu = false;
+        HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
+        HAL_NVIC_EnableIRQ(EXTI1_IRQn);
     }
-    if (HAL_GetTick() - State_Button_t.time_btn_select < DELAY_PUSHED) {
+
+    if (State_Button_t.button_select){
         State_Button_t.button_select = false;
+        HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
+        HAL_NVIC_EnableIRQ(EXTI2_IRQn);
     }
 
     if (State_Button_t.button_beep != Settings->buzzer_enable)
@@ -60,11 +65,13 @@ void Button_Task(Button_t *Data, const Device_Settings_t *Settings) {
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
     if (GPIO_Pin == Button_Menu_Pin && !State_Button_t.button_menu){
+        HAL_NVIC_DisableIRQ(EXTI1_IRQn);
         State_Button_t.button_menu = true;
         State_Button_t.time_btn_menu = HAL_GetTick();
     }
 
     if (GPIO_Pin == Button_Select_Pin && !State_Button_t.button_select){
+        HAL_NVIC_DisableIRQ(EXTI2_IRQn);
         State_Button_t.button_select = true;
         State_Button_t.time_btn_select = HAL_GetTick();
     }
