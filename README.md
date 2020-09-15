@@ -42,9 +42,9 @@ Or use Clion IDE and load CMakeLists.txt file <br>
 
 
 After a successful build, such files will be created<br>
-:white_check_mark:   `firmware-x.x.x.bin` update for flash GUI flasher<br>
-:white_check_mark:   `FullFW.bin` for flash via SWD flasher ST-link or Jlink<br>
-:white_check_mark:   `FullFW.bin` has bootloader, firmware and default eeprom data<br>
+:beer:   `firmware-x.x.x.bin` update for flash GUI flasher<br>
+:beer:   `FullFW.bin` for flash via SWD flasher ST-link or Jlink<br>
+:beers:   `FullFW.bin` has bootloader, firmware and default eeprom data<br>
 <br>
 
 #### Flash memory map for STM32F103TBU (128kb)

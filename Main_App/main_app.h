@@ -44,15 +44,6 @@ typedef enum {
 }Device_Error_e;
 
 typedef struct {
-    bool Button_menu_pushed;
-    bool Button_select_pushed;
-    bool Button_menu_pressed;
-    bool Button_select_pressed;
-    uint32_t time_btn_menu;
-    uint32_t time_btn_select;
-}Button_t;
-
-typedef struct {
     float Vbus;
     float Vout;
     float internal_temperature_stm;
@@ -106,7 +97,6 @@ typedef struct {
     Device_Settings_t Device_Settings;
     ADC_Voltage_Data_t ADC_Data;
     Battery_Status_t Battery_Info;
-    Button_t State_Button;
     Device_Error_e Device_Error;
     ChargeChip_t ChargeChip;
     uint8_t time_for_auto_off;

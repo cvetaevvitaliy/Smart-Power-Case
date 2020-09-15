@@ -8,6 +8,13 @@
 #include "main_app.h"
 #include "Power.h"
 
-void Button_Task(Button_t *Data, const Device_Settings_t *Settings);
+enum Button_e{
+    Button_menu,
+    Button_select,
+};
+
+
+void Button_Task(const Device_Settings_t *Settings);
+bool Button_GetState (enum Button_e button);
 
 #endif //FATSHARK_POWER_V1_BUTTON_H

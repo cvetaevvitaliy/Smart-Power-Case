@@ -133,7 +133,7 @@ void App_Loop(void){
 
     Time_Task(&Device_Status);
     ADC_Task(&Device_Status.ADC_Data);
-    Button_Task(&Device_Status.State_Button, &Device_Status.Device_Settings);
+    Button_Task(&Device_Status.Device_Settings);
     OLED_UI_Task(&Device_Status);
     Power_BatteryTask(&Device_Status);
     Power_ChargerTask(&Device_Status.ChargeChip);
