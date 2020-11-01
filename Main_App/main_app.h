@@ -7,7 +7,7 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
 //#include "tinyprintf.h"
-#ifdef USE_USB_DEBUG_PRINTF
+#ifdef USE_USB_DEBUG
 #include "usb_device.h"
 #include "printf_USB.h"
 #endif
@@ -15,6 +15,7 @@
 #include "stdbool.h"
 #include "BQ27441.h"
 #include "bq2589x_charger.h"
+#include "CLI_comands.h"
 
 
 typedef enum {
@@ -114,5 +115,8 @@ void App_Setup(void);
 void App_Init(void);
 bool App_Check_StartUp(void);
 void App_Loop(void);
+Device_Status_t* Get_Device_Status(void);
+void Activate_DFU(void);
+bool Settings_Get_Buzzer(void);
 
 #endif //FATSHARKPOWER_SMART_POWER_APP_H

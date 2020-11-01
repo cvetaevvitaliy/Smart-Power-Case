@@ -832,7 +832,6 @@ uint8_t  USBD_CDC_SetRxBuffer  (USBD_HandleTypeDef   *pdev,
   USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
   
   hcdc->RxBuffer = pbuff;
-  
   return USBD_OK;
 }
 

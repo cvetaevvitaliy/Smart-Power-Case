@@ -51,7 +51,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "cli.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,6 +60,15 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+#define LEN_BUFF        (1000)
+typedef struct {
+    uint8_t tx_buff[LEN_BUFF];
+    uint16_t in_pos;
+    uint16_t out_pos;
+
+}CLI_setnt_buff_t;
+CLI_setnt_buff_t Out_buff = {0};
 
 /* USER CODE END PV */
 
@@ -157,7 +166,7 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 static int8_t CDC_Init_FS(void);
 static int8_t CDC_DeInit_FS(void);
 static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length);
-static int8_t CDC_Receive_FS(uint8_t* pbuf, uint32_t *Len);
+int8_t CDC_Receive_FS(uint8_t* pbuf, uint32_t *Len);
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_DECLARATION */
 
@@ -288,11 +297,18 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   * @param  Len: Number of data received (in bytes)
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
+int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  //uint8_t c = Buf[0];
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+    if (*Len == 1){
+        CLI_AppendChar((char )Buf[0]);
+    } else {
+        for (uint16_t i = 0; i < *Len; i++)
+            CLI_AppendChar((char) Buf[i]);
+    }
   return (USBD_OK);
   /* USER CODE END 6 */
 }
@@ -323,6 +339,35 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 }
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
+
+void CDC_Transmit_SET_BUFF(char ch) {
+
+    Out_buff.tx_buff[Out_buff.in_pos] = (uint8_t) ch;
+    if (Out_buff.in_pos < LEN_BUFF - 1)
+        Out_buff.in_pos++;
+    else
+        Out_buff.in_pos = 0;
+
+}
+
+void CDC_SEND_BUFF(void)
+{
+    uint16_t len = 0;
+    if (Out_buff.in_pos != Out_buff.out_pos) {
+
+        if (Out_buff.in_pos > Out_buff.out_pos) {
+            len = Out_buff.in_pos - Out_buff.out_pos;
+            CDC_Transmit_FS((uint8_t *) &Out_buff.tx_buff[Out_buff.out_pos], len);
+            Out_buff.out_pos = Out_buff.in_pos;
+        } else{
+            len = LEN_BUFF - Out_buff.out_pos;
+            CDC_Transmit_FS((uint8_t *) &Out_buff.tx_buff[Out_buff.out_pos], len);
+            Out_buff.out_pos = 0;
+        }
+    }
+
+}
+
 
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 

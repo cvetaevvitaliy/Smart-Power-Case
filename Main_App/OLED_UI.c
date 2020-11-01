@@ -5,9 +5,10 @@
 #include "OLED_UI.h"
 #include "button.h"
 #include "ssd1306.h"
+#include <stdio.h>
 
 extern TIM_HandleTypeDef htim2;
-static char print_oled_string[30] = {0};
+char print_oled_string[15] = {0};
 
 static enum Current_Menu_e {
     Current_Screen_Main_Progress = 0,
@@ -197,7 +198,7 @@ static void OLED_UI_PrintMainScreen(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_PrintMenuPage_1(Device_Status_t *Data){
+void OLED_UI_PrintMenuPage_1(Device_Status_t *Data){
 
     static uint8_t ptr = 0;
 
@@ -232,33 +233,33 @@ static void OLED_UI_PrintMenuPage_1(Device_Status_t *Data){
 }
 
 
-static void OLED_UI_PrintMenuPage_2(Device_Status_t *Data){
+void OLED_UI_PrintMenuPage_2(Device_Status_t *Data){
 
-    static uint8_t ptr = 0;
+    static uint8_t ptr_p2 = 0;
 
     if (Button_GetState(Button_menu)){
-        ptr++;
-        if (ptr > 3) {
+        ptr_p2++;
+        if (ptr_p2 > 3) {
             Current_Menu = Current_Screen_Menu_Page_1;
-            ptr = 0;
+            ptr_p2 = 0;
             return;
         }
     }
 
     if (Button_GetState(Button_select)) {
-        if (ptr == 0 )
+        if (ptr_p2 == 0 )
             Current_Menu = Current_Screen_Time_Off;
-        if (ptr == 1 )
+        if (ptr_p2 == 1 )
             Current_Menu = Current_Screen_Set_Capacity;
-        if (ptr == 2 )
+        if (ptr_p2 == 2 )
             Current_Menu = Current_Screen_Get_Info;
-        if (ptr == 3) {
+        if (ptr_p2 == 3) {
             Current_Menu = Current_Screen_Main_Progress;
-            ptr = 0;
+            ptr_p2 = 0;
         }
     }
 
-    ssd1306_Draw_Bitmap_Mono(3 + POSITION_ICONS * ptr,3,&Image_Frame_27x27);
+    ssd1306_Draw_Bitmap_Mono(3 + POSITION_ICONS * ptr_p2,3,&Image_Frame_27x27);
 
     ssd1306_Draw_Bitmap_Mono(4,4,&Image_Set_Timer_Off);
     ssd1306_Draw_Bitmap_Mono(4 + POSITION_ICONS,4,&Image_Set_Capasity_Design);
@@ -418,13 +419,17 @@ static inline void OLED_UI_MainScreen_2(Device_Status_t *Data){
 
 static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
 
-    static uint8_t ptr = 0;
+    HAL_Delay(100);
+    static uint8_t ptr_low = 0;
     static uint8_t shift_frame;
     static bool read_settings = false;
     static uint16_t min_volt = 0;
     static uint8_t first_position = 0;
     static uint8_t second_position = 0;
     static uint8_t third_position = 0;
+
+    if (ptr_low > 3)
+        ptr_low = 0;
 
     if (read_settings == false) {
         read_settings = true;
@@ -435,22 +440,22 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
     }
 
     if (Button_GetState(Button_select) ) {
-        if ( ptr == 0 ) {
+        if ( ptr_low == 0 ) {
             first_position++;
             if (first_position == 4)
                 first_position = 2;
         }
-        if ( ptr == 1 ){
+        if ( ptr_low == 1 ){
             second_position++;
             if (second_position == 10)
                 second_position = 0;
         }
-        if ( ptr == 2 ){
+        if ( ptr_low == 2 ){
             third_position++;
             if (third_position == 10)
                 third_position = 0;
         }
-        if (ptr == 3 ){
+        if (ptr_low == 3 ){
 
             if (Data->need_calibrate)
                 Current_Menu = Current_Screen_Main_Progress;
@@ -460,7 +465,7 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
             Data->Device_Settings.low_volt = (first_position * 100) + (second_position * 10) + third_position;
             Settings_Set(&Data->Device_Settings);
             Settings_SetMinVoltPowerOff(Data->Device_Settings.low_volt);
-            ptr = 0;
+            ptr_low = 0;
             Data->need_calibrate = false;
             read_settings = false;
         }
@@ -468,9 +473,9 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
 
 
     if (Button_GetState(Button_menu) ) {
-        ptr++;
-        if (ptr == 4)
-            ptr = 0;
+        ptr_low++;
+        if (ptr_low == 4)
+            ptr_low = 0;
     }
 
     ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Frame_27x27);
@@ -483,13 +488,13 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
     sprintf(print_oled_string, "%dV", third_position);
     ssd1306_Draw_String(print_oled_string, POSITION_TEXT_X + POSITION_SHIFT + 23, POSITION_TEXT_Y, &Font_8x10);
 
-    if (ptr == 0)
+    if (ptr_low == 0)
         shift_frame = POSITION_SHIFT + 0;
-    if (ptr == 1)
+    if (ptr_low == 1)
         shift_frame = POSITION_SHIFT + 15;
-    if (ptr == 2)
+    if (ptr_low == 2)
         shift_frame = POSITION_SHIFT+ 23;
-    if (ptr < 3)
+    if (ptr_low < 3)
         ssd1306_DrawHorizontalLine(POSITION_TEXT_X + shift_frame, POSITION_TEXT_Y + 10, 7);
     else
         ssd1306_Draw_Bitmap_Mono(POSITION_ICO_APPLY_X - 1, POSITION_ICO_APPLY_Y - 1, &Image_Frame_27x27);
@@ -501,29 +506,29 @@ static void OLED_UI_ScreenSetLowVolt (Device_Status_t *Data){
 
 static void OLED_UI_ScreenSetIMax (Device_Status_t *Data) {
 
-    static uint8_t ptr = 0;
+    static uint8_t ptr_max = 0;
     static uint8_t shift_frame;
     static uint16_t I_set = 0;
     static uint8_t set_I_max[4] = {0};
-    static bool read_settings = false;
+    static bool read_settings_i = false;
 
-    if (!read_settings) {
+    if (!read_settings_i) {
         I_set = Data->Device_Settings.current_max;
         set_I_max[0] = I_set / 1000;
         set_I_max[1] = (I_set / 100) % 10;
         set_I_max[2] = (I_set / 10) % 10;
         set_I_max[3] = I_set % 10;
-        read_settings = true;
+        read_settings_i = true;
     }
 
     if (Button_GetState(Button_menu) ) {
-        ptr++;
-        if (ptr == 5)
-            ptr = 0;
+        ptr_max++;
+        if (ptr_max == 5)
+            ptr_max = 0;
     }
 
     if (Button_GetState(Button_select) ) {
-        switch (ptr) {
+        switch (ptr_max) {
             case 0:
                 set_I_max[0]++;
                 if (set_I_max[0] == 4)
@@ -549,11 +554,12 @@ static void OLED_UI_ScreenSetIMax (Device_Status_t *Data) {
                 Data->Device_Settings.current_max =
                         (set_I_max[0] * 1000) + (set_I_max[1] * 100) + (set_I_max[2] * 10) + set_I_max[3];
                 Settings_Set(&Data->Device_Settings);
-                ptr = 0;
-                read_settings = false;
+                Power_ChargerInit();
+                ptr_max = 0;
+                read_settings_i = false;
                 break;
             default:
-                ptr = 0;
+                ptr_max = 0;
         }
     }
 
@@ -561,14 +567,14 @@ static void OLED_UI_ScreenSetIMax (Device_Status_t *Data) {
     ssd1306_Draw_Bitmap_Mono(1, 3, &Image_Set_I_Max);
     for (uint8_t i = 0; i < 4; i++) {
         sprintf(print_oled_string, "%d", set_I_max[i]);
-        if (ptr == i )
+        if (ptr_max == i )
             ssd1306_SetColor(Black);
         ssd1306_Draw_String(print_oled_string, POSITION_TEXT_X - 4  + POSITION_SHIFT - 4 + (i * 10), POSITION_TEXT_Y,
                             &Font_8x10);
         ssd1306_SetColor(White);
     }
 
-    if (ptr == 4)
+    if (ptr_max == 4)
         ssd1306_Draw_Bitmap_Mono(POSITION_ICO_APPLY_X - 1, POSITION_ICO_APPLY_Y - 1, &Image_Frame_27x27);
 
     ssd1306_Draw_String("mA", POSITION_TEXT_X + 67, POSITION_TEXT_Y, &Font_8x10);
@@ -579,24 +585,27 @@ static void OLED_UI_ScreenSetIMax (Device_Status_t *Data) {
 
 static void OLED_UI_ScreenSetVout (Device_Status_t *Data){
 
-    static uint8_t ptr = 0;
+    static uint8_t ptr_v = 0;
+
+    if (ptr_v > 3)
+        ptr_v = 0;
 
     ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Frame_27x27);
     ssd1306_Draw_Bitmap_Mono(4, 4, &Image_Set_V_Out);
 
     if (Button_GetState(Button_menu) ) {
-        ptr++;
-        if (ptr == 3)
-            ptr = 0;
+        ptr_v++;
+        if (ptr_v == 3)
+            ptr_v = 0;
     }
 
-    if (ptr == 0)
+    if (ptr_v == 0)
         ssd1306_Draw_Bitmap_Mono(37, 6, &Image_Frame_22x20);
 
-    if (ptr == 1)
+    if (ptr_v == 1)
         ssd1306_Draw_Bitmap_Mono(64, 6, &Image_Frame_22x20);
 
-    if (ptr == 2)
+    if (ptr_v == 2)
         ssd1306_Draw_Bitmap_Mono(POSITION_ICO_APPLY_X - 1, POSITION_ICO_APPLY_Y - 1, &Image_Frame_27x27);
 
     ssd1306_SetColor(White);
@@ -616,18 +625,18 @@ static void OLED_UI_ScreenSetVout (Device_Status_t *Data){
     ssd1306_SetColor(White);
 
     if (Button_GetState(Button_select) ) {
-        if (ptr == 0)
+        if (ptr_v == 0)
             Data->Device_Settings.Boost_mode = Boost_8V;
-        if (ptr == 1)
+        if (ptr_v == 1)
             Data->Device_Settings.Boost_mode = Boost_12V;
-        if (ptr == 2) {
+        if (ptr_v == 2) {
             Current_Menu = Current_Screen_Menu_Page_1;
             if (Data->Device_Settings.Boost_mode == Boost_12V)
                 Power_BoostEnable12V(true);
             else
                 Power_BoostEnable12V(false);
             Settings_Set(&Data->Device_Settings);
-            ptr = 0;
+            ptr_v = 0;
         }
 
     }
@@ -638,24 +647,32 @@ static void OLED_UI_ScreenSetVout (Device_Status_t *Data){
 
 static void OLED_UI_ScreenSetBuzzer (Device_Status_t *Data){
 
-    static uint8_t ptr = 0;
+    volatile static uint8_t ptr_buzz = 0;
 
     ssd1306_Draw_Bitmap_Mono(3, 3, &Image_Frame_27x27);
-    ssd1306_Draw_Bitmap_Mono(4, 4, &Image_Set_V_Out);
+    ssd1306_Draw_Bitmap_Mono(4, 4, &Image_Buzzer);
 
-    if (Button_GetState(Button_menu) ) {
-        ptr++;
-        if (ptr == 3)
-            ptr = 0;
+    if (ptr_buzz > 2) {
+        if (Data->Device_Settings.buzzer_enable)
+            ptr_buzz = 0;
+        else
+            ptr_buzz = 1;
     }
 
-    if (ptr == 0)
+
+    if (Button_GetState(Button_menu) ) {
+        ptr_buzz++;
+        if (ptr_buzz == 3)
+            ptr_buzz = 0;
+    }
+
+    if (ptr_buzz == 0)
         ssd1306_Draw_Bitmap_Mono(37, 6, &Image_Frame_22x20);
 
-    if (ptr == 1)
+    if (ptr_buzz == 1)
         ssd1306_Draw_Bitmap_Mono(64, 6, &Image_Frame_22x20);
 
-    if (ptr == 2)
+    if (ptr_buzz == 2)
         ssd1306_Draw_Bitmap_Mono(POSITION_ICO_APPLY_X - 1, POSITION_ICO_APPLY_Y - 1, &Image_Frame_27x27);
 
     ssd1306_SetColor(White);
@@ -675,14 +692,14 @@ static void OLED_UI_ScreenSetBuzzer (Device_Status_t *Data){
     ssd1306_SetColor(White);
 
     if (Button_GetState(Button_select) ) {
-        if (ptr == 0)
+        if (ptr_buzz == 0)
             Data->Device_Settings.buzzer_enable = true;
-        if (ptr == 1)
+        if (ptr_buzz == 1)
             Data->Device_Settings.buzzer_enable = false;
-        if (ptr == 2) {
+        if (ptr_buzz == 2) {
             Current_Menu = Current_Screen_Menu_Page_1;
             Settings_Set(&Data->Device_Settings);
-            ptr = 0;
+            ptr_buzz = 0;
         }
 
     }
@@ -692,7 +709,7 @@ static void OLED_UI_ScreenSetBuzzer (Device_Status_t *Data){
 
 static void OLED_UI_ScreenSetTimeOff (Device_Status_t *Data) {
 
-    static uint8_t ptr = 0;
+    static uint8_t ptr_t = 0;
     static uint8_t time_minutes = 0;
     static bool read_settings = false;
 
@@ -706,29 +723,29 @@ static void OLED_UI_ScreenSetTimeOff (Device_Status_t *Data) {
 
 
     if (Button_GetState(Button_menu)) {
-        ptr++;
-        if (ptr == 2)
-            ptr = 0;
+        ptr_t++;
+        if (ptr_t == 2)
+            ptr_t = 0;
     }
 
     if (Button_GetState(Button_select)) {
-        if (ptr == 0) {
+        if (ptr_t == 0) {
             time_minutes += 5;
             if (time_minutes > 60)
                 time_minutes = 0;
         }
 
-        if (ptr == 1) {
+        if (ptr_t == 1) {
             Current_Menu = Current_Screen_Menu_Page_2;
             Data->Device_Settings.time_auto_off = (uint16_t)time_minutes;
             Settings_Set(&Data->Device_Settings);
-            ptr = 0;
+            ptr_t = 0;
             read_settings = false;
         }
 
     }
 
-    if (ptr == 0)
+    if (ptr_t == 0)
         ssd1306_SetColor(Black);
     else
         ssd1306_SetColor(White);
@@ -741,7 +758,7 @@ static void OLED_UI_ScreenSetTimeOff (Device_Status_t *Data) {
     ssd1306_Draw_String(print_oled_string, POSITION_TEXT_X + 37, POSITION_TEXT_Y, &Font_8x10);
     ssd1306_SetColor(White);
 
-    if (ptr == 1)
+    if (ptr_t == 1)
         ssd1306_Draw_Bitmap_Mono(POSITION_ICO_APPLY_X - 1, POSITION_ICO_APPLY_Y - 1, &Image_Frame_27x27);
     ssd1306_Draw_Bitmap_Mono(POSITION_ICO_APPLY_X, POSITION_ICO_APPLY_Y, &Image_Apply);
 
@@ -751,43 +768,43 @@ static void OLED_UI_ScreenSetTimeOff (Device_Status_t *Data) {
 static void OLED_UI_ScreenSetCapacity (Device_Status_t *Data){
 
 
-    static uint8_t ptr = 0;
+    static uint8_t ptr_c = 0;
     static uint8_t shift_frame;
     static uint16_t capacity = 0;
     static uint8_t set_capacity[4] = {0};
-    static bool read_settings = false;
+    static bool read_settings_c = false;
 
-    if (!read_settings) {
+    if (!read_settings_c) {
         capacity = Data->Device_Settings.design_capacity;
         set_capacity[0] = capacity / 1000;
         set_capacity[1] = (capacity / 100) % 10;
         set_capacity[2] = (capacity / 10) % 10;
         set_capacity[3] = capacity % 10;
-        read_settings = true;
+        read_settings_c = true;
     }
 
     if (Button_GetState(Button_select) ) {
-        if ( ptr == 0 ) {
+        if ( ptr_c == 0 ) {
             set_capacity[0]++;
             if (set_capacity[0] == 8)
                 set_capacity[0] = 0;
         }
-        if ( ptr == 1 ){
+        if ( ptr_c == 1 ){
             set_capacity[1]++;
             if (set_capacity[1] == 10)
                 set_capacity[1] = 0;
         }
-        if ( ptr == 2 ){
+        if ( ptr_c == 2 ){
             set_capacity[2]++;
             if (set_capacity[2] == 10)
                 set_capacity[2] = 0;
         }
-        if ( ptr == 3 ){
+        if ( ptr_c == 3 ){
             set_capacity[3]++;
             if (set_capacity[3] == 10)
                 set_capacity[3] = 0;
         }
-        if (ptr == 4 ){
+        if (ptr_c == 4 ){
             if (Data->need_calibrate == true)
                 Current_Menu = Current_Screen_Low_Volt;
             else
@@ -796,29 +813,29 @@ static void OLED_UI_ScreenSetCapacity (Device_Status_t *Data){
             Data->Device_Settings.design_capacity = (set_capacity[0] * 1000) + (set_capacity[1] * 100) + (set_capacity[2] * 10) + set_capacity[3];
             Settings_Set(&Data->Device_Settings);
             Settings_SetBQ27441SetCapacity(Data->Device_Settings.design_capacity);
-            ptr = 0;
-            read_settings = false;
+            ptr_c = 0;
+            read_settings_c = false;
         }
     }
 
     if (Button_GetState(Button_menu) ) {
-        ptr++;
-        if (ptr == 5)
-            ptr = 0;
+        ptr_c++;
+        if (ptr_c == 5)
+            ptr_c = 0;
     }
 
     ssd1306_Draw_Bitmap_Mono(0, 2, &Image_Frame_27x27);
     ssd1306_Draw_Bitmap_Mono(1, 3, &Image_Set_Capasity_Design);
     for (uint8_t i = 0; i < 4; i++) {
         sprintf(print_oled_string, "%d", set_capacity[i]);
-        if (ptr == i )
+        if (ptr_c == i )
             ssd1306_SetColor(Black);
         ssd1306_Draw_String(print_oled_string, POSITION_TEXT_X - 4  + POSITION_SHIFT - 4 + (i * 10), POSITION_TEXT_Y,
                             &Font_8x10);
         ssd1306_SetColor(White);
     }
 
-    if (ptr == 4)
+    if (ptr_c == 4)
         ssd1306_Draw_Bitmap_Mono(POSITION_ICO_APPLY_X - 1, POSITION_ICO_APPLY_Y - 1, &Image_Frame_27x27);
 
     ssd1306_Draw_String("mAh", POSITION_TEXT_X + 67, POSITION_TEXT_Y, &Font_8x10);

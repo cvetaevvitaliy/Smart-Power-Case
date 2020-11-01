@@ -1,6 +1,6 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
-
+#include "tinyprintf.h"
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)
 
 #define Button_Menu_Pin GPIO_PIN_1

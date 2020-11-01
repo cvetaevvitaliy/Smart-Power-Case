@@ -90,3 +90,4 @@ void Settings_SetBQ27441SetCapacity(uint16_t capacity){
 void Settings_SetMinVoltPowerOff(uint16_t volt){
     bq2589x_set_bat_limit(volt);
 }
+

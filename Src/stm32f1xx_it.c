@@ -37,6 +37,8 @@
 
 /* USER CODE BEGIN 0 */
 #include "stdbool.h"
+#include "usbd_cdc_if.h"
+#include "cli.h"
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -46,6 +48,7 @@ extern DMA_HandleTypeDef hdma_i2c1_tx;
 extern DMA_HandleTypeDef hdma_i2c1_rx;
 extern I2C_HandleTypeDef hi2c1;
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
@@ -185,6 +188,7 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
+  SysTick_CLI();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
@@ -348,6 +352,19 @@ void TIM2_IRQHandler(void)
   /* USER CODE END TIM2_IRQn 1 */
 }
 
+/**
+* @brief This function handles TIM3 global interrupt.
+*/
+void TIM3_IRQHandler(void)
+{
+    /* USER CODE BEGIN TIM3_IRQn 0 */
+    CDC_SEND_BUFF();
+    /* USER CODE END TIM3_IRQn 0 */
+    HAL_TIM_IRQHandler(&htim3);
+    /* USER CODE BEGIN TIM3_IRQn 1 */
+
+    /* USER CODE END TIM3_IRQn 1 */
+}
 /**
 * @brief This function handles I2C1 event interrupt.
 */

@@ -4,4 +4,7 @@
   <component name="JavaScriptSettings">
     <option name="languageLevel" value="ES6" />
   </component>
+  <component name="elmot.OpenOcdPlugin">
+    <option name="openOcdHome" value="/usr/local" />
+  </component>
 </project>

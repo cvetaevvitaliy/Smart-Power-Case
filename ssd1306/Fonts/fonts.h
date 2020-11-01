@@ -58,7 +58,6 @@ extern const tImage Image_Used_mAh;
 extern const tImage Image_Current_I;
 extern const tImage Image_Remaining_Time;
 extern const tImage Image_Power_On_Time;
-extern const tImage Image_Temperature_Ico;
 extern const tImage Image_Vout;
 extern const tImage Image_Set_12V;
 extern const tImage Image_Set_8V;
