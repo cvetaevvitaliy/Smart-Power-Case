@@ -1,0 +1,59 @@
+notifications:
+  email: false
+
+sudo: false
+
+language: c
+
+matrix:
+  fast_finish: true
+  include:
+#    - name: 7-2018-q2
+#      env: GCC_URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2?revision=bc2c96c0-14b5-4bb4-9f18-bceb4050fee7?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,7-2018-q2-update
+    - name : 6-2017-q2
+      env: GCC_URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/6-2017q2/gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2?revision=2cc92fb5-3e0e-402d-9197-bdfc8224d8a5?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,6-2017-q2-update
+#    - name : 5-2016-q3
+#      env: GCC_URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/5_4-2016q3/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2?revision=111dee36-f88b-4672-8ac6-48cf41b4d375?product=GNU%20Arm%20Embedded%20Toolchain,32-bit,,Linux,5-2016-q3-update
+
+addons:
+  apt:
+    packages:
+      - libc6-i386
+
+install:
+  - pushd .
+  - cd ~
+#  - mkdir build_artifacts
+  - mkdir arm-gcc-toolchain
+  - wget -O $HOME/arm-gcc-toolchain/gcc.tar.bz2 $GCC_URL
+  - cd arm-gcc-toolchain
+  - tar -jxf gcc.tar.bz2 --strip=1
+  - popd
+  - export PATH=$HOME/arm-gcc-toolchain/bin:$PATH
+
+before_script:
+  - arm-none-eabi-gcc --version
+  - arm-none-eabi-objcopy --version
+
+script:
+  - mkdir build
+  - cd build
+  - cmake -DDEBUG=OFF -DTYPE_MCU=F103TBU ..
+  - make
+#  - mkdir $HOME/build_artifacts/STM32F103TBU
+#  - cp out_dir/*.bin $HOME/build_artifacts/STM32F103TBU
+  - cd ..
+  - rm -Rf build
+  - mkdir build
+  - cd build
+  - cmake -DDEBUG=OFF -DTYPE_MCU=F103T8U ..
+  - make
+#  - mkdir $HOME/build_artifacts/STM32F103T8U
+#  - cp out_dir/*.bin $HOME/build_artifacts/STM32F103T8U
+
+#addons:
+#  artifacts:
+#    enabled: true
+#    # ⋮
+#     paths:
+#       - $HOME/build_artifacts/
