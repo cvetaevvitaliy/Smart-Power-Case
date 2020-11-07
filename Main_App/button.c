@@ -38,8 +38,9 @@ void Button_Task(const Device_Settings_t *Settings) {
         } else
             start_delay = false;
 
-        if (HAL_GetTick() - time_power_off > DELAY_KEY_PUSHED_POWER_OFF)
+        if (HAL_GetTick() - time_power_off > DELAY_KEY_PUSHED_POWER_OFF) {
             Power_Off();
+        }
     } else
         time_power_off = HAL_GetTick();
 

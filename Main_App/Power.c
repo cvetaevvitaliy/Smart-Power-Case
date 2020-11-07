@@ -3,9 +3,12 @@
 ********************************/
 #include "Power.h"
 #include "bq2589x_charger.h"
+#include "cli.h"
+#include "button.h"
 
 
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 
 void Power_OLEDOn(bool state){
 
@@ -76,7 +79,6 @@ void Power_SystemOn(bool state){
 void Power_BatteryTask(Device_Status_t *Data){
 
     static uint32_t time_delay_task = 0;
-    static uint32_t time_auto_off = 0;
     static bool start_timer_auto_off = false;
 
     if (HAL_GetTick() - time_delay_task > 500) {
@@ -124,35 +126,24 @@ void Power_BatteryTask(Device_Status_t *Data){
             bq2589x_enter_hiz_mode();
         }
 
-        if (Data->Battery_Info.current > -300 && Data->Battery_Info.current < 100 && Data->ChargeChip.Vbus < 3500)
-        {
-            if (start_timer_auto_off == false) {
-                time_auto_off = HAL_GetTick();
-                start_timer_auto_off = true;
-            }
-            if (HAL_GetTick() - time_auto_off > 120000){
-                TIM2->ARR = 30000;
-                HAL_TIM_Base_Start_IT(&htim2);
-                Power_Off();
-            }
-
-        } else {
-            start_timer_auto_off = false;
-            time_auto_off = HAL_GetTick();
-        }
 
         time_delay_task = HAL_GetTick();
     }
 }
 
 
-void Power_DevicePowerOffTimer(const Device_Status_t *Data){
+void Power_DevicePowerOffTimer( Device_Status_t *Data){
 
+    if (HAL_GPIO_ReadPin(ButtonMenu_GPIO_Port, Button_Menu_Pin) != GPIO_PIN_RESET) {
+        Data->time_for_auto_off = 0;
+    }
     if (Data->time_for_auto_off != 0
         && Data->ChargeChip.charging_status == 0
         && Data->Device_Settings.time_auto_off != 0) {
-        if (Data->time_for_auto_off >= Data->Device_Settings.time_auto_off)
-            Power_Off();
+        if (Data->time_for_auto_off >= Data->Device_Settings.time_auto_off) {
+            TIM2->ARR = 2000;
+            HAL_TIM_Base_Start_IT(&htim2);
+        }
     }
 
 }
@@ -163,8 +154,10 @@ void Power_Off(void){
     ssd1306_Clear();
     ssd1306_Draw_String("Power Off", 20, 10, &Font_8x10);
     ssd1306_UpdateScreen();
-    TIM2->ARR = 30000;
-    HAL_TIM_Base_Start_IT(&htim2);
+    if (Settings_Get_Buzzer()) {
+        TIM2->ARR = 30000;
+        HAL_TIM_Base_Start_IT(&htim2);
+    }
     HAL_Delay(300);
 
     bq2589x_enter_ship_mode();
@@ -228,29 +221,65 @@ void Power_ChargerTask(ChargeChip_t *Data){
             Power_BoostEnable(false);
 
 
-#ifdef USE_USB_DEBUG_PRINTF
+#ifdef USE_USB_DEBUG
 
         if (Data->vbus_type == BQ2589X_VBUS_USB_SDP  || Data->vbus_type == BQ2589X_VBUS_USB_CDP) {
             if (usb_enable == false) {
                 usb_enable = true;
-                Enable_USB_Debug(true);
                 Power_USBResetGPIO();
                 Power_USBEnable(true);
                 HAL_Delay(200);
                 MX_USB_DEVICE_Init();
-                HAL_Delay(200);  /// need this time for reset and reinit USB
+                ssd1306_Clear();
+                ssd1306_Draw_String("CLI ENABLE", 20, 10, &Font_8x10);
+                ssd1306_UpdateScreen();
+                HAL_Delay(2000);  /// need this time for reset and reinit USB
+                HAL_TIM_Base_Start_IT(&htim3);
+                Enable_USB_Debug(true);
+                CLI_Set_First_IN(false);
+
             }
         }
 
         if (Data->vbus_type == BQ2589X_VBUS_NONE && usb_enable == true) {
             Power_USBEnable(false);
+            HAL_TIM_Base_Stop_IT(&htim3);
             MX_USB_DEVICE_DeInit();
             usb_enable = false;
             Enable_USB_Debug(false);
-            HAL_Delay(200);
+            CLI_Set_First_IN(true);
+            ssd1306_Clear();
+            ssd1306_Draw_String("CLI DISABLE", 20, 10, &Font_8x10);
+            ssd1306_UpdateScreen();
+            HAL_Delay(2000);
         }
 #endif
 
         time_delay_task = HAL_GetTick();
     }
+}
+
+void Power_DCDC(void){
+
+    static bool enable_dcdc = false;
+
+    if (enable_dcdc == false){
+        enable_dcdc = true;
+        bq2589x_adc_start(false);
+        bq2589x_enter_ship_mode();
+        bq2589x_enter_hiz_mode();
+        ssd1306_Clear();
+        ssd1306_Draw_String("Out POWER OFF", 10, 10, &Font_8x10);
+        ssd1306_UpdateScreen();
+        HAL_Delay(2000);
+    } else {
+        enable_dcdc = false;
+        Power_ChargerInit();
+        ssd1306_Clear();
+        ssd1306_Draw_String("Out POWER ON", 15, 10, &Font_8x10);
+        ssd1306_UpdateScreen();
+        HAL_Delay(2000);
+    }
+
+
 }

@@ -15,6 +15,7 @@ RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -23,6 +24,7 @@ static void MX_I2C1_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
 static void MX_RTC_Init(void);
 static void USB_Reset_GPIO(void);
 
@@ -39,6 +41,7 @@ int main(void) {
     MX_ADC1_Init();
     MX_TIM1_Init();
     MX_TIM2_Init();
+    MX_TIM3_Init();
     MX_RTC_Init();
     App_Setup();
     App_Init();
@@ -203,7 +206,7 @@ static void MX_TIM1_Init(void) {
     TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
 
     htim1.Instance = TIM1;
-    htim1.Init.Prescaler = 320;
+    htim1.Init.Prescaler = 210;
     htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim1.Init.Period = 140;
     htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -260,7 +263,7 @@ static void MX_TIM2_Init(void) {
     TIM_MasterConfigTypeDef sMasterConfig;
 
     htim2.Instance = TIM2;
-    htim2.Init.Prescaler = 480;
+    htim2.Init.Prescaler = 580;
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim2.Init.Period = 2000;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -277,6 +280,39 @@ static void MX_TIM2_Init(void) {
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
     if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK) {
+        _Error_Handler(__FILE__, __LINE__);
+    }
+
+}
+
+/* TIM3 init function */
+static void MX_TIM3_Init(void)
+{
+
+    TIM_ClockConfigTypeDef sClockSourceConfig;
+    TIM_MasterConfigTypeDef sMasterConfig;
+
+    htim3.Instance = TIM3;
+    htim3.Init.Prescaler = 48000;
+    htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim3.Init.Period = 25;
+    htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+    {
+        _Error_Handler(__FILE__, __LINE__);
+    }
+
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+    {
+        _Error_Handler(__FILE__, __LINE__);
+    }
+
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+    {
         _Error_Handler(__FILE__, __LINE__);
     }
 
@@ -382,6 +418,8 @@ void USB_Reset_GPIO(void) {
   */
 void _Error_Handler(char *file, int line) {
     /* User can add his own implementation to report the HAL error return state */
+    HAL_RTCEx_BKUPWrite(&hrtc, 4, 0x424C);
+    HAL_Delay(1000);
     while (1) {
         NVIC_SystemReset();
     }

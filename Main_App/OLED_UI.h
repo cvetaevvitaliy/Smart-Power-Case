@@ -9,6 +9,8 @@
 #include "Settings_Eeprom.h"
 #include "Power.h"
 
+#include <tinyprintf.h>
+
 
 #define POSITION_BATTERY_X                  97
 #define POSITION_BATTERY_Y                  1
