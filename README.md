@@ -1,6 +1,6 @@
-# Smart Power Case for FatShark
-
-<div align="right">
+<div align="center">
+ 
+ # Smart Power Case for FatShark, Skyzone, DJI fpv goggles
  
  [![Build Status](https://travis-ci.com/cvetaevvitaliy/Smart-Power-Case.svg?branch=master)](https://travis-ci.org/dwyl/learn-travis)
  [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/cvetaevvitaliy/Smart-Power-Case/graphs/contributors)
