@@ -89,30 +89,34 @@ foreach(LANGUAGE ${GUI_LANGUAGE})
 endforeach()
 
 file(GLOB_RECURSE SOURCES "startup/*.*"
-        "Middlewares/*.*"
-        "Drivers/*.*" "Src/*.*"
-        "Inc/*.*"
-        "cli/cli.c"
-        "cli/lib/cli_input.c"
-        "cli/lib/cli_log.c"
-        "cli/lib/cli_queue.c"
-        "cli/lib/cli_string.c"
-        "cli/lib/cli_time.c"
-        "cli/lib/static_memory.c"
-        "cli/lib/sys_call.c"
-        "ssd1306/*.*"
-        "ssd1306/Image/*.*"
-        "ssd1306/Fonts/*.*"
-        "Main_App/*.*")
+        "Drivers/Middlewares/*.*"
+        "Drivers/*.*"
+        "src/*.*"
+        "src/cli/cli.c"
+        "src/cli/lib/cli_input.c"
+        "src/cli/lib/cli_log.c"
+        "src/cli/lib/cli_queue.c"
+        "src/cli/lib/cli_string.c"
+        "src/cli/lib/cli_time.c"
+        "src/cli/lib/static_memory.c"
+        "src/cli/lib/sys_call.c"
+        "src/ssd1306/*.*"
+        "src/ssd1306/Image/*.*"
+        "src/ssd1306/Fonts/*.*"
+        "src/main_app/*.*")
 
 include_directories(Inc
         Drivers/STM32F1xx_HAL_Driver/Inc
         Drivers/STM32F1xx_HAL_Driver/Inc/Legacy
-        Middlewares/ST/STM32_USB_Device_Library/Core/Inc
-        Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
+        Drivers/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
+        Drivers/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
         Drivers/CMSIS/Device/ST/STM32F1xx/Include Drivers/CMSIS/Include
-        ssd1306 ssd1306/Fonts ssd1306/Image Main_App
-        cli cli/lib)
+        src/ssd1306
+        src/ssd1306/Fonts
+        src/ssd1306/Image
+        src/main_app
+        src/cli
+        src/cli/lib)
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
 
