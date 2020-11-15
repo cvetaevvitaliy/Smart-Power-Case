@@ -96,15 +96,14 @@ file(GLOB_RECURSE SOURCES "startup/*.*"
         "src/*.*")
 
 
-include_directories(Inc
-        src
+include_directories(src
         src/device
         src/ssd1306
         src/ssd1306/Fonts
         src/ssd1306/Image
         src/cli
         src/cli/lib
-        src/Main_App
+        src/main_app
         drivers/STM32F1xx_HAL_Driver/Inc
         drivers/STM32F1xx_HAL_Driver/Inc/Legacy
         drivers/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
