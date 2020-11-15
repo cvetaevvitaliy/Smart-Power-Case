@@ -3,7 +3,7 @@
 //
 #ifndef FATSHARK_POWER_V1_PRINTF_USB_H
 #define FATSHARK_POWER_V1_PRINTF_USB_H
-#include "../main.h"
+#include "main.h"
 #ifdef USE_USB_DEBUG
 #include "stm32f1xx_hal.h"
 #include "usb_device.h"

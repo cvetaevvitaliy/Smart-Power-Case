@@ -4,12 +4,12 @@
 
 #ifndef FATSHARKPOWER_SMART_POWER_APP_H
 #define FATSHARKPOWER_SMART_POWER_APP_H
-#include "../main.h"
+#include "main.h"
 #include "stm32f1xx_hal.h"
 //#include "tinyprintf.h"
 #ifdef USE_USB_DEBUG
-#include "../device/usb_device.h"
-#include "../device/printf_USB.h"
+#include "usb_device.h"
+#include "printf_USB.h"
 #endif
 #include "ssd1306.h"
 #include "stdbool.h"

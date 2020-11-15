@@ -34,7 +34,7 @@
 #include <stdint.h>
 
 #include "tinyprintf.h"
-#include "../device/printf_USB.h"
+#include "printf_USB.h"
 
 
 // define this globally (e.g. gcc -DPRINTF_INCLUDE_CONFIG_H ...) to include the

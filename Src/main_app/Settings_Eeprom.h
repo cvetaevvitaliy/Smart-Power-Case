@@ -3,7 +3,7 @@
 ********************************/
 #ifndef FATSHARK_POWER_V1_SETTINGS_EEPROM_H
 #define FATSHARK_POWER_V1_SETTINGS_EEPROM_H
-#include "../device/eeprom.h"
+#include "eeprom.h"
 #include "main_app.h"
 #include "Power.h"
 

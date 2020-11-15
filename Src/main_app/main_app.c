@@ -7,9 +7,7 @@
 #include "button.h"
 #include "Power.h"
 #include "Settings_Eeprom.h"
-#ifdef USE_USB_DEBUG_PRINTF
 #include "Debug.h"
-#endif
 #include "cli.h"
 
 #define MAGIC_BKP_VALUE_BOOT                   ((uint32_t)0x424C) /// this value for write to BKP RTC register, to enable bootloader after reboot
@@ -39,26 +37,27 @@ void App_Init(void){
 
     CLI_Init(TDC_None);
     CLI_cmd_init();
+
     if (Power_ChargerInit() == false){
         Device_Status.Device_Error = Device_Error_BQ25895;
         Device_Status.system_critical_error = true;
-#ifdef USE_USB_DEBUG_PRINTF
-        printf("ADC BQ25895\n");
+#if 0
+        LOG_DEBUG("ADC BQ25895\n");
 #endif
     }
 
     if (ADC_Init() == false){
         Device_Status.Device_Error = Device_Error_ADC;
         Device_Status.system_critical_error = true;
-#ifdef USE_USB_DEBUG_PRINTF
-        printf("ADC Error\n");
+#if 0
+        LOG_DEBUG("ADC Error\n");
 #endif
     }
     if (BQ27441_init() == false) {
         Device_Status.Device_Error = Device_Error_BQ27441;
         Device_Status.system_critical_error = true;
-#ifdef USE_USB_DEBUG_PRINTF
-        printf("BQ27441 not found\n");
+#if 0
+        LOG_DEBUG("BQ27441 not found\n");
 #endif
     }
 
@@ -67,8 +66,8 @@ void App_Init(void){
     if (ssd1306_Init() == false) {
         Device_Status.Device_Error = Device_Error_SSD1306;
         Device_Status.system_critical_error = true;
-#ifdef USE_USB_DEBUG_PRINTF
-        printf("ssd1306 not found\n");
+#if 0
+        LOG_DEBUG("ssd1306 not found\n");
 #endif
         Power_OLEDOn(false);
         Power_SystemOn(false);
@@ -86,8 +85,8 @@ void App_Init(void){
 bool App_Check_StartUp(void){
 
     if (Device_Status.system_critical_error == true){
-#ifdef USE_USB_DEBUG_PRINTF
-        printf("Error %d\n", Device_Status.Device_Error);
+#if 0
+        LOG_DEBUG("Error %d\n", Device_Status.Device_Error);
 #endif
         if (Device_Status.Device_Error != Device_Error_SSD1306) {
             ssd1306_Draw_String("Error System", 0, 0, &Font_8x10);
@@ -140,7 +139,7 @@ void App_Loop(void){
     OLED_UI_Task(&Device_Status);
     Power_BatteryTask(&Device_Status);
     Power_ChargerTask(&Device_Status.ChargeChip);
-#ifdef USE_USB_DEBUG_PRINTF
+#if 0
     Debug_Task(&Device_Status);
 #endif
 

@@ -61,7 +61,7 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
-#define LEN_BUFF        (1000)
+#define LEN_BUFF        (2048)
 typedef struct {
     uint8_t tx_buff[LEN_BUFF];
     uint16_t in_pos;

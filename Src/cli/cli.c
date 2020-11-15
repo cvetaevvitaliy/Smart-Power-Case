@@ -13,8 +13,7 @@
 #include "cli_log.h"
 #include "cli_input.h"
 #include "stm32f1xx_hal.h"
-#include "../device/usb_device.h"
-#include "../device/usbd_cdc_if.h"
+#include "usbd_cdc_if.h"
 #define printArrow()			{CLI_Printf("%s%s",STRING_TERM_ENTER, STRING_TERM_ARROW);}	// Output of input line
 #define printArrowWithoutN()	{CLI_Printf(STRING_TERM_ARROW);}
 
@@ -240,6 +239,16 @@ TE_Result_e Execute(char **argv, uint8_t argc)
 TE_Result_e ExecuteString(const char *str)
 {
 	split((char *)str, " ", (Params_s *)&Terminal.inputArgs);
+
+#if 0
+    LOG_DEBUG("\r\nCMD: ");
+	LOG_DEBUG("%s",str);
+#endif
+
+#if 0
+	for(uint8_t i = 0; i < Terminal.inputArgs.argc; i++)
+        LOG_DEBUG("\r\n: %s", Terminal.inputArgs.argv[i]);
+#endif
 
 	TE_Result_e result = Execute(Terminal.inputArgs.argv, Terminal.inputArgs.argc);
 
@@ -499,6 +508,14 @@ TC_Result_e CLI_AppendChar(char ch)
     InputValue_s iv = INPUT_PutChar(ch);
 	char c = iv.keyCode;
 
+#if 0
+	CLI_DPrintf("\r\n");
+	for(uint8_t i = 0; i < 4; i++)
+	{
+		CLI_DPrintf("0x%02X ", (char) *((char*)(Terminal.symbols.ptrObj + i)));
+	}
+    CLI_DPrintf("\r\nKey Code: 0x%02X", (uint8_t) ch);
+#endif
 	if (iv.isValid)
 	{
 		switch (c) {

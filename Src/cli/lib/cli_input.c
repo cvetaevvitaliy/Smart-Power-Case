@@ -10,7 +10,7 @@ extern uint32_t _strlen(const char* strSrc);
 typedef struct
 {
 	char Data[CLI_CMD_BUF_SIZE + 1];				// buffer
-	int16_t CursorInBuffer;							// cursor position
+	int16_t CursorInBuffer;							// cursos position
 	int16_t BufferCount;							// count entered symbols
 }Buffer_s;
 
@@ -19,7 +19,7 @@ struct
 	Buffer_s Buffers[INPUT_COUNT_BUFFER];			// buffers commands
 	Buffer_s* CurBuffer;
 	Queue_s Symbols;								// queue symbols input
-	InputBufferType_e CurrentBuffer;				// current processing buffer
+	InputBufferType_e CurrentBuffer;				// current proccesing buffer
 }Input;
 
 static void _AddChar(char c)
@@ -73,14 +73,14 @@ void INPUT_Refresh(const char* newCmd)
         	{CLI_PutChar(TERM_KEY_BACKSPACE);}	
         
 #if 0
-		CLI_DPrintf("\r\nNewCmd: %s", newCmd);
-		CLI_DPrintf("\r\nlenNewCmd: %d", lenNewCmd);
+        LOG_DEBUG("\r\nNewCmd: %s", newCmd);
+		LOG_DEBUG("\r\nlenNewCmd: %d", lenNewCmd);
 #endif
 
 	}
 	else
 	{
-        //CLI_Printf("%s",Input.CurBuffer->Data);
+        //LOG_DEBUG("%s",Input.CurBuffer->Data);
 		for(uint8_t i = 0; i < Input.CurBuffer->BufferCount; i++)
 		{
 			CLI_PutChar(Input.CurBuffer->Data[i]);
@@ -214,7 +214,8 @@ InputValue_s INPUT_PutChar(char c) {
                      ((c >= 'a') && (c <= 'z')) ||
                      ((c >= 'A') && (c <= 'Z')) ||
                      (c == 0x20) || (c == '_') ||
-                     (c == '-') || (c == 0x03));
+                     (c == '-') || (c == 0x03) ||
+                     (c == '$') || (c == '<'));
 
     iv.keyCode = c;
     return iv;

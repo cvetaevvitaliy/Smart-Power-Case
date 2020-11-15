@@ -4,11 +4,6 @@
 #include "stdlib.h"
 #include "string.h"
 
-__attribute__((unused)) void Q_Free(QueueObj* qdObj)
-{
-	Queue_s* qd = (Queue_s*) qdObj;
-    cli_free(qd->ptrObj);
-}
 
 void Q_Init(QueueObj* qdObj, uint16_t sizeQueue, uint8_t sizeObj, uint32_t mode)
 {

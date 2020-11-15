@@ -1,4 +1,3 @@
-#THIS FILE IS AUTO GENERATED FROM THE TEMPLATE! DO NOT CHANGE!
 SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.7)
@@ -25,12 +24,16 @@ add_definitions(-DGIT_HASH=\"${GIT_HASH}\")
 
 
 add_definitions(-DSOFTWARE_VERSION=\"${VERSION_FW}\")
-if (DEBUG STREQUAL ON)
+if (DEBUG_USB STREQUAL ON)
     add_definitions(-DUSE_USB_DEBUG_PRINTF)
     set(OPTIMIZATION_LEVEL -g)
 else()
     add_definitions(-DUSE_USB_DEBUG)
     set(OPTIMIZATION_LEVEL -O2)
+endif()
+
+if (DEBUG STREQUAL ON)
+    add_definitions(-DDEBUG=1)
 endif()
 
 # Set type STM32 STM32F103T8U - 64kb flash, STM32F103TBU - 128kb flash (add cmake build flag TYPE_MCU=F103TBU or TYPE_MCU=F103T8U)
@@ -89,34 +92,24 @@ foreach(LANGUAGE ${GUI_LANGUAGE})
 endforeach()
 
 file(GLOB_RECURSE SOURCES "startup/*.*"
-        "Drivers/Middlewares/*.*"
-        "Drivers/*.*"
-        "src/*.*"
-        "src/cli/cli.c"
-        "src/cli/lib/cli_input.c"
-        "src/cli/lib/cli_log.c"
-        "src/cli/lib/cli_queue.c"
-        "src/cli/lib/cli_string.c"
-        "src/cli/lib/cli_time.c"
-        "src/cli/lib/static_memory.c"
-        "src/cli/lib/sys_call.c"
-        "src/ssd1306/*.*"
-        "src/ssd1306/Image/*.*"
-        "src/ssd1306/Fonts/*.*"
-        "src/main_app/*.*")
+        "drivers/*.*"
+        "src/*.*")
 
-include_directories(Inc
-        Drivers/STM32F1xx_HAL_Driver/Inc
-        Drivers/STM32F1xx_HAL_Driver/Inc/Legacy
-        Drivers/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
-        Drivers/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
-        Drivers/CMSIS/Device/ST/STM32F1xx/Include Drivers/CMSIS/Include
+
+include_directories(src
+        src/device
         src/ssd1306
         src/ssd1306/Fonts
         src/ssd1306/Image
-        src/main_app
         src/cli
-        src/cli/lib)
+        src/cli/lib
+        src/main_app
+        drivers/STM32F1xx_HAL_Driver/Inc
+        drivers/STM32F1xx_HAL_Driver/Inc/Legacy
+        drivers/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
+        drivers/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
+        drivers/CMSIS/Device/ST/STM32F1xx/Include
+        drivers/CMSIS/Include)
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
 
@@ -133,16 +126,12 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND echo \"*****************************************************************\"
         COMMAND echo Start create Full firmware for flash via SWD
         COMMAND echo In Flash memory 0x8000000 bootloader.bin
-        COMMAND echo In Flash memory 0x8000800 ${BIN_FILE}
+        COMMAND echo In Flash memory 0x8000800 ${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin
         COMMAND echo In Flash memory 0x801FC00 eeprom data for STM32F103TBU and 0x800FC00 for STM32F103T8U
         COMMAND dd if=${PROJECT_SOURCE_DIR}/bootloader.bin of=FullFW.bin bs=1 count=2048
-        COMMAND dd if=${BIN_FILE} of=FullFW.bin bs=1 seek=2048
+        COMMAND dd if=${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin of=FullFW.bin bs=1 seek=2048
         COMMAND dd if=${PROJECT_SOURCE_DIR}/eeprom.bin of=FullFW.bin bs=1 seek=${SEEK_DATA}
         COMMAND echo File FullFW.bin created complete
-        COMMAND rm -Rf ${PROJECT_BINARY_DIR}/out_dir
-        COMMAND mkdir ${PROJECT_BINARY_DIR}/out_dir
-        COMMAND cp ${BIN_FILE} ${PROJECT_BINARY_DIR}/out_dir
-        COMMAND cp ${PROJECT_BINARY_DIR}/FullFW.bin ${PROJECT_BINARY_DIR}/out_dir
         COMMAND echo \"*****************************************************************\"
         COMMENT "Building ${HEX_FILE}
 Building ${BIN_FILE}")

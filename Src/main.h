@@ -31,4 +31,4 @@
 
 void _Error_Handler(char *, int);
 
-#endif /* __MAIN_H__ */
+#endif
