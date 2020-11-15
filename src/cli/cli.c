@@ -26,6 +26,7 @@ static void CLI_PrintTime();
 void CLI_PrintTimeWithoutRN();
 char dbgbuffer[128];
 volatile uint64_t SysTic;                                        // Variable tackts cntr
+volatile uint32_t *UniqueID = (uint32_t *)0x1FFFF7E8;
 
 
 static uint8_t _help_cmd();
@@ -78,7 +79,7 @@ static void cli_welcome(void)
 	CLI_Printf("\r\n****************************************************");
 	CLI_Printf("\r\n| CLI Smart Power Case                             |");
 	CLI_Printf("\r\n| SW  ver: v%s.%s.%s   MCU: %s \t\t   |", MINOR, MAJOR, PATCH, MCU);
-	CLI_Printf("\r\n| CLI ver: %s \t\t\t\t   |", _TERM_VER_);
+	CLI_Printf("\r\n| CLI ver: %s   UID: %X-%X-%X |", _TERM_VER_, UniqueID[0], UniqueID[1], UniqueID[2]);
 	CLI_Printf("\r\n| Build Date: %s %s \t\t   |", __DATE__, __TIME__);
 	CLI_Printf("\r\n| Branch: %s GIT-HASH: %s\t\t   |", GIT_BRANCH, GIT_HASH);
 	CLI_Printf("\r\n****************************************************");
