@@ -16,57 +16,57 @@
 #include "tinyprintf.h"
 
 
-/** @brief Terminal Error Result Execute */
+/** @brief CLI Error Result Execute */
 typedef enum{ 
-	TE_OK = 0, 
-	TE_Err, 
-	TE_NotFound, 
-	TE_ArgErr, 
-	TE_ExecErr, 
-	TE_WorkInt
-}TE_Result_e;
+	CLI_OK = 0,
+	CLI_Err,
+	CLI_NotFound,
+	CLI_ArgErr,
+	CLI_ExecErr,
+	CLI_WorkInt
+}CLI_Result_t;
 
-/** @brief Terminal Add Command Result */
+/** @brief CLI Add Command Result */
 typedef enum{ 
-	TA_OK = 0, 
-	TA_MaxCmd, 
-	TA_FcnNull, 
-	TA_EmptyName, 
-	TA_RetryName
-}TA_Result_e;
+	ADD_CMD_OK = 0,
+	ADD_CMD_MaxCmd,
+	ADD_CMD_FcnNull,
+	ADD_CMD_EmptyName,
+	ADD_CMD_RetryName
+}CLI_ADD_CMD_Result_t;
 
-/** @brief Terminal Char Append Result */
+/** @brief CLI Char Append Result */
 typedef enum{ 
-	TC_OK = 0, 
-	TC_Enter, 
-	TC_BufFull, 
-	TC_Reset, 
-	TC_Ignore
-}TC_Result_e; 
+	CLI_APPEND_OK = 0,
+    CLI_APPEND_Enter,
+    CLI_APPEND_BufFull,
+    CLI_APPEND_Reset,
+    CLI_APPEND_Ignore
+}CLI_Append_Result_t;
 
-/** @brief Terminal Default Init Command */
+/** @brief CLI Default Init Command */
 typedef enum{
-	TDC_None = 0x0000,
-	TDC_Time = 0x0001,
-	TDC_CPU = 0x0002,
-	TDC_All = 0xFFFF
-}TypeDefaultCmd_e;
+	CLI_TDC_None = 0x0000,
+    CLI_TDC_Time = 0x0001,
+    CLI_TDC_CPU = 0x0002,
+    CLI_TDC_All = 0xFFFF
+}CLI_TypeDefaultCmd_t;
 
-/** @brief Terminal Mode Execute Command */
+/** @brief CLI Mode Execute Command */
 typedef enum{
-	TMC_None = 0x0000,
-	TMC_PrintStartTime = 0x0001,
-	TMC_PrintStopTime = 0x0002,
-	TMC_PrintDiffTime = 0x0004,
-	TMC_All = 0xFFFF,
-}TypeModeCmd_e;
+	CLI_PrintNone = 0x0000,
+	CLI_PrintStartTime = 0x0001,
+	CLI_PrintStopTime = 0x0002,
+	CLI_PrintDiffTime = 0x0004,
+	CLI_Print_All = 0xFFFF,
+}CLI_TypeModeCmd_t;
 
 
 bool CLI_GetIntState(void);
 #define CLI_CheckAbort()			{ if (CLI_GetIntState()){return TE_WorkInt;}}
 
 /** @brief Terminal initialize */
-void CLI_Init(TypeDefaultCmd_e defCmd);
+void CLI_Init(CLI_TypeDefaultCmd_t defCmd);
 
 /** @brief Execute command */
 bool CLI_Service();
@@ -81,11 +81,11 @@ bool CLI_Service();
  * @param descr - description
  * @return result append command
  * */
-TA_Result_e CLI_AddCmd(const char* name, uint8_t (*fcn)(), uint8_t argc, uint16_t mode, const char* descr);
+CLI_ADD_CMD_Result_t CLI_AddCmd(const char* name, uint8_t (*fcn)(), uint8_t argc, uint16_t mode, const char* descr);
 
 
 /** @brief Append new symbols */
-TC_Result_e CLI_AppendChar(char c);
+CLI_Append_Result_t CLI_AppendChar(char c);
 
 /** @brief For check arguments flag */
 bool CLI_IsArgFlag(const char* flag);

@@ -35,7 +35,7 @@ void App_Setup(void){
 
 void App_Init(void){
 
-    CLI_Init(TDC_None);
+    CLI_Init(CLI_TDC_None);
     CLI_cmd_init();
 
     if (Power_ChargerInit() == false){

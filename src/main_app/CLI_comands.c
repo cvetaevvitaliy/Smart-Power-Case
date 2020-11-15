@@ -22,10 +22,10 @@ void CLI_cmd_init(void) {
      * 	for example @mode - TMC_PrintStartTime | TMC_PrintStopTime - to see the command execution time
      * */
 
-    CLI_AddCmd("bat", get_bat, 0, TMC_None, "get battery info");
-    CLI_AddCmd("eeprom", get_eeprom, 0, TMC_None, "get eeprom data");
-    CLI_AddCmd("charger", get_charger, 0, TMC_None, "get charger chip info");
-    CLI_AddCmd("out", set_out, 0, TMC_None, "enable or disable power out");
+    CLI_AddCmd("bat", get_bat, 0, CLI_PrintNone, "get battery info");
+    CLI_AddCmd("eeprom", get_eeprom, 0, CLI_PrintNone, "get eeprom data");
+    CLI_AddCmd("charger", get_charger, 0, CLI_PrintNone, "get charger chip info");
+    CLI_AddCmd("out", set_out, 0, CLI_PrintNone, "enable or disable power out");
 }
 
 // ***************** implementation commands ****************
@@ -43,7 +43,7 @@ static uint8_t get(void){
         //return TE_ArgErr;
     }
 
-    return TE_OK;
+    return CLI_OK;
 }
 
 uint8_t get_bat(void) {
@@ -57,7 +57,7 @@ uint8_t get_bat(void) {
     CLI_Printf("\r\n Full capacity:\t%dmAh", device->Battery_Info.capacity_full);
     CLI_Printf("\r\n Capacity:\t%dmAh", device->Battery_Info.capacity);
 
-    return TE_OK;
+    return CLI_OK;
 }
 
 uint8_t get_eeprom(void) {
@@ -70,7 +70,7 @@ uint8_t get_eeprom(void) {
     CLI_Printf("\r\n MAX Current:\t%dmA", device->Device_Settings.current_max );
     CLI_Printf("\r\n Min Vbat:\t%.2fV", (float )(device->Device_Settings.low_volt / 100.0) );
 
-    return TE_OK;
+    return CLI_OK;
 }
 
 uint8_t get_charger(void){
@@ -100,12 +100,12 @@ uint8_t get_charger(void){
 
     CLI_Printf("\r\n Charge done:\t%s", device->ChargeChip.charge_done ? "Yes" : "No");
 
-    return TE_OK;
+    return CLI_OK;
 }
 
 uint8_t set_out(void){
 
     Power_DCDC();
 
-    return TE_OK;
+    return CLI_OK;
 }

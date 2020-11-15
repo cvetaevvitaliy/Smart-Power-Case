@@ -1,9 +1,6 @@
 #include "cli_string.h"
 #include "cli_config.h"
 
-void _strcpy(const char* src, uint16_t offsetSrc, char* dst, uint16_t offsetDst, uint16_t length);
-uint8_t _strcmp(const char* str1, const char* str2);
-uint32_t _strlen(const char* strSrc);
 uint16_t _getCountSeparator(const char* str, const char* separator);
 
 /// \brief Splitting a string by a given separator

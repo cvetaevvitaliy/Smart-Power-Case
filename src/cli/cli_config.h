@@ -82,14 +82,13 @@
 // **************************************************************************
 
 // *************************   IO CLI Settings    ***************************
-void TUSART_Print(char* str);
+void CLI_PrintStr(char* str);
+void CLI_PrintChar(char c);
 
-void TUSART_PutChar(char c);
 extern char dbgbuffer[128];
-#define COM_Printf(...)       {sprintf(dbgbuffer,__VA_ARGS__);TUSART_Print(dbgbuffer);}
-#define CLI_Printf          COM_Printf
+#define CLI_Printf(...)         {sprintf(dbgbuffer,__VA_ARGS__);CLI_PrintStr(dbgbuffer);}
 #if (ECHO_EN == 1)
-#define CLI_PutChar         TUSART_PutChar
+#define CLI_PutChar             CLI_PrintChar
 #else	// ECHO_EN != 1 ECHO off
 #define CLI_PutChar
 #endif  // ECHO_EN == 1
@@ -100,9 +99,9 @@ extern char dbgbuffer[128];
 
 /**< This macro for debug software */
 #if (DEBUG == 1)
-#define LOG_DEBUG(f_, ...) printf(("\n[DEBUG] "f_), ##__VA_ARGS__)
-#define LOG_INFO(f_, ...) printf(("\n[INFO] "f_), ##__VA_ARGS__)
-#define LOG_ERROR(f_, ...) printf(("\n[ERROR] "f_), ##__VA_ARGS__)
+#define LOG_DEBUG(f_, ...)          CLI_Printf(("\n[DEBUG] "f_), ##__VA_ARGS__)
+#define LOG_INFO(f_, ...)           CLI_Printf(("\n[INFO] "f_), ##__VA_ARGS__)
+#define LOG_ERROR(f_, ...)          CLI_Printf(("\n[ERROR] "f_), ##__VA_ARGS__)
 #else
 #define LOG_DEBUG(f_, ...)
 #define LOG_INFO(f_, ...)
@@ -117,9 +116,9 @@ extern char dbgbuffer[128];
 
 // yout implementation
 extern volatile uint64_t SysTic;
-#define CLI_GetUs()                    ((float)SysTic * 1000)    // System time in us
-#define CLI_GetFastUs()                (SysTic << 3)            // System time in us (not exact)
-#define CLI_GetFastMs()                (SysTic >> 7)            // System time in ms (not exact)
+#define CLI_GetUs()                     ((float)SysTic * 1000)    // System time in us
+#define CLI_GetFastUs()                 (SysTic << 3)            // System time in us (not exact)
+#define CLI_GetFastMs()                 (SysTic >> 7)            // System time in ms (not exact)
 #define CLI_CounterReset()              {SysTic = 0;}
 
 #else	// CLI_TIMELEFT_EN != 1

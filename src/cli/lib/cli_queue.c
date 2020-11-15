@@ -7,7 +7,7 @@
 
 void Q_Init(QueueObj* qdObj, uint16_t sizeQueue, uint8_t sizeObj, uint32_t mode)
 {
-	Queue_s* qd = (Queue_s*) qdObj;
+	CLI_Queue_t* qd = (CLI_Queue_t*) qdObj;
 
     qd->ptrObj = (void*) cli_malloc(sizeObj * sizeQueue);
 
@@ -23,7 +23,7 @@ void Q_Init(QueueObj* qdObj, uint16_t sizeQueue, uint8_t sizeObj, uint32_t mode)
 
 bool Q_Push(QueueObj* qdObj, const void* value)
 {
-	Queue_s* qd = (Queue_s*) qdObj;
+	CLI_Queue_t* qd = (CLI_Queue_t*) qdObj;
 
 	if (qd->_cntr >= qd->size)
 	{
@@ -47,7 +47,7 @@ bool Q_Push(QueueObj* qdObj, const void* value)
 
 bool Q_Pop(QueueObj* qdObj, void* value)
 {
-	Queue_s* qd = (Queue_s*) qdObj;
+	CLI_Queue_t* qd = (CLI_Queue_t*) qdObj;
 
 	if (qd->_cntr == 0)
 		return false;
@@ -64,14 +64,14 @@ bool Q_Pop(QueueObj* qdObj, void* value)
 
 bool Q_IsFull(QueueObj* qdObj)
 {
-	Queue_s* qd = (Queue_s*) qdObj;
+	CLI_Queue_t* qd = (CLI_Queue_t*) qdObj;
 
 	return qd->_cntr >= qd->size;
 }
 
 bool Q_IsEmpty(QueueObj* qdObj)
 {
-	Queue_s* qd = (Queue_s*) qdObj;
+	CLI_Queue_t* qd = (CLI_Queue_t*) qdObj;
 
 	return qd->_cntr == 0;
 }

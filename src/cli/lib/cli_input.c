@@ -3,8 +3,6 @@
 #include "cli_queue.h"
 #include "cli_string.h"
 
-extern uint32_t _strlen(const char* strSrc);
-
 #define INPUT_COUNT_BUFFER		2
 
 typedef struct
@@ -12,65 +10,65 @@ typedef struct
 	char Data[CLI_CMD_BUF_SIZE + 1];				// buffer
 	int16_t CursorInBuffer;							// cursos position
 	int16_t BufferCount;							// count entered symbols
-}Buffer_s;
+}CLI_Buffer_t;
 
-struct
+static struct
 {
-	Buffer_s Buffers[INPUT_COUNT_BUFFER];			// buffers commands
-	Buffer_s* CurBuffer;
-	Queue_s Symbols;								// queue symbols input
-	InputBufferType_e CurrentBuffer;				// current proccesing buffer
-}Input;
+	CLI_Buffer_t Buffers[INPUT_COUNT_BUFFER];			// buffers commands
+	CLI_Buffer_t* CurBuffer;
+	CLI_Queue_t Symbols;								// queue symbols input
+	CLI_InputBufferType_t CurrentBuffer;				// current proccesing buffer
+}CLI_Input_s;
 
 static void _AddChar(char c)
 {
-	CLI_PutChar(c);
-	
-	Input.CurBuffer->Data[Input.CurBuffer->CursorInBuffer] = c;
-	Input.CurBuffer->BufferCount++;
-	Input.CurBuffer->CursorInBuffer++;
-	Input.CurBuffer->Data[Input.CurBuffer->BufferCount] = '\0';
+    CLI_PutChar(c);
+
+    CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->CursorInBuffer] = c;
+	CLI_Input_s.CurBuffer->BufferCount++;
+	CLI_Input_s.CurBuffer->CursorInBuffer++;
+    CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->BufferCount] = '\0';
 }
 
 static void _RemChar()
 {
-	CLI_PutChar(TERM_KEY_BACKSPACE);
+    CLI_PutChar(TERM_KEY_BACKSPACE);
     CLI_PutChar(' ');
     CLI_PutChar(TERM_KEY_BACKSPACE);
     
-	Input.CurBuffer->CursorInBuffer--;
-	Input.CurBuffer->BufferCount--;
-	Input.CurBuffer->Data[Input.CurBuffer->BufferCount] = '\0';
+	CLI_Input_s.CurBuffer->CursorInBuffer--;
+	CLI_Input_s.CurBuffer->BufferCount--;
+    CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->BufferCount] = '\0';
 }
 
-void INPUT_Refresh(const char* newCmd)
+void CLI_INPUT_Refresh(const char* newCmd)
 {
     CLI_PutChar('\r');
     CLI_Printf(STRING_TERM_ARROW);
 
-	if (Input.CurBuffer->Data != newCmd)
+	if (CLI_Input_s.CurBuffer->Data != newCmd)
 	{
 		uint32_t lenNewCmd = _strlen(newCmd);
-		uint32_t lenCurCmd = Input.CurBuffer->BufferCount;
-		cli_memcpy(Input.CurBuffer->Data, newCmd, lenNewCmd);
-		
-		Input.CurBuffer->BufferCount = lenNewCmd;
-		Input.CurBuffer->CursorInBuffer = lenNewCmd;
+		uint32_t lenCurCmd = CLI_Input_s.CurBuffer->BufferCount;
+		cli_memcpy(CLI_Input_s.CurBuffer->Data, newCmd, lenNewCmd);
+
+        CLI_Input_s.CurBuffer->BufferCount = lenNewCmd;
+        CLI_Input_s.CurBuffer->CursorInBuffer = lenNewCmd;
 
 		for(uint8_t i = 0; i < lenNewCmd; i++)
 		{
-			CLI_PutChar(Input.CurBuffer->Data[i]);
+            CLI_PutChar(CLI_Input_s.CurBuffer->Data[i]);
 		}
 
 		uint8_t cntSpcChar = 0;
 		for(uint8_t i = lenNewCmd; i < lenCurCmd; i++)
 		{
-			CLI_PutChar(' ');
+            CLI_PutChar(' ');
 			cntSpcChar++;
 		}
 		
 		for(uint8_t i = 0; i < cntSpcChar; i++)
-        	{CLI_PutChar(TERM_KEY_BACKSPACE);}	
+        	{ CLI_PutChar(TERM_KEY_BACKSPACE);}
         
 #if 0
         LOG_DEBUG("\r\nNewCmd: %s", newCmd);
@@ -81,43 +79,43 @@ void INPUT_Refresh(const char* newCmd)
 	else
 	{
         //LOG_DEBUG("%s",Input.CurBuffer->Data);
-		for(uint8_t i = 0; i < Input.CurBuffer->BufferCount; i++)
+		for(uint8_t i = 0; i < CLI_Input_s.CurBuffer->BufferCount; i++)
 		{
-			CLI_PutChar(Input.CurBuffer->Data[i]);
+            CLI_PutChar(CLI_Input_s.CurBuffer->Data[i]);
 		}
 	}
 }
 
-bool INPUT_IsEmpty()
+bool CLI_INPUT_IsEmpty()
 {
-	return Input.CurBuffer->BufferCount == 0;
+	return CLI_Input_s.CurBuffer->BufferCount == 0;
 }
 
-bool INPUT_IsFull()
+bool CLI_INPUT_IsFull()
 {
-	return Input.CurBuffer->BufferCount >= CLI_CMD_BUF_SIZE;
+	return CLI_Input_s.CurBuffer->BufferCount >= CLI_CMD_BUF_SIZE;
 }
 
-void INPUT_RemChar()
+void CLI_INPUT_RemChar()
 {
 	#if (CLI_LR_KEY_EN == 1)
 
-	if (Input.CurBuffer->CursorInBuffer != Input.CurBuffer->BufferCount)
+	if (CLI_Input_s.CurBuffer->CursorInBuffer != CLI_Input_s.CurBuffer->BufferCount)
 	{
 		// save current position cursor
-		uint8_t tmpPos = Input.CurBuffer->CursorInBuffer - 1;
+		uint8_t tmpPos = CLI_Input_s.CurBuffer->CursorInBuffer - 1;
 
-		cli_memcpy(Input.Buffers[TransitBuffer].Data, Input.CurBuffer->Data, tmpPos);
-		cli_memcpy(Input.Buffers[TransitBuffer].Data + tmpPos, Input.CurBuffer->Data + tmpPos + 1, Input.CurBuffer->BufferCount - tmpPos);
-		
-		Input.Buffers[TransitBuffer].Data[Input.CurBuffer->BufferCount - 1] = '\0';
-		
-		INPUT_Refresh(Input.Buffers[TransitBuffer].Data);
+		cli_memcpy(CLI_Input_s.Buffers[TransitBuffer].Data, CLI_Input_s.CurBuffer->Data, tmpPos);
+		cli_memcpy(CLI_Input_s.Buffers[TransitBuffer].Data + tmpPos, CLI_Input_s.CurBuffer->Data + tmpPos + 1, CLI_Input_s.CurBuffer->BufferCount - tmpPos);
 
-		for(uint8_t pos = 0; pos < Input.CurBuffer->BufferCount - tmpPos; pos++)
+        CLI_Input_s.Buffers[TransitBuffer].Data[CLI_Input_s.CurBuffer->BufferCount - 1] = '\0';
+
+        CLI_INPUT_Refresh(CLI_Input_s.Buffers[TransitBuffer].Data);
+
+		for(uint8_t pos = 0; pos < CLI_Input_s.CurBuffer->BufferCount - tmpPos; pos++)
 		{
             CLI_PutChar(TERM_KEY_LSHIFT);
-			Input.CurBuffer->CursorInBuffer--;
+			CLI_Input_s.CurBuffer->CursorInBuffer--;
 		}
 	}
 	else
@@ -129,28 +127,28 @@ void INPUT_RemChar()
 #endif
 }
 
-void INPUT_AddChar(char c)
+void CLI_INPUT_AddChar(char c)
 {
 #if (CLI_LR_KEY_EN == 1)
-	if (Input.CurBuffer->CursorInBuffer != Input.CurBuffer->BufferCount)
+	if (CLI_Input_s.CurBuffer->CursorInBuffer != CLI_Input_s.CurBuffer->BufferCount)
 	{
-		uint8_t tmpPos = Input.CurBuffer->CursorInBuffer;
-		cli_memcpy(Input.Buffers[TransitBuffer].Data, Input.CurBuffer->Data, tmpPos);
-		cli_memcpy(Input.Buffers[TransitBuffer].Data + tmpPos, &c, 1);
-		cli_memcpy(Input.Buffers[TransitBuffer].Data + tmpPos + 1, Input.CurBuffer->Data + tmpPos, Input.CurBuffer->BufferCount - tmpPos);
-		Input.Buffers[TransitBuffer].Data[Input.CurBuffer->BufferCount + 1] = '\0';
+		uint8_t tmpPos = CLI_Input_s.CurBuffer->CursorInBuffer;
+		cli_memcpy(CLI_Input_s.Buffers[TransitBuffer].Data, CLI_Input_s.CurBuffer->Data, tmpPos);
+		cli_memcpy(CLI_Input_s.Buffers[TransitBuffer].Data + tmpPos, &c, 1);
+		cli_memcpy(CLI_Input_s.Buffers[TransitBuffer].Data + tmpPos + 1, CLI_Input_s.CurBuffer->Data + tmpPos, CLI_Input_s.CurBuffer->BufferCount - tmpPos);
+        CLI_Input_s.Buffers[TransitBuffer].Data[CLI_Input_s.CurBuffer->BufferCount + 1] = '\0';
 		
-		Input.CurBuffer->BufferCount++;
-		Input.CurBuffer->CursorInBuffer++;
-		Input.CurBuffer->Data[Input.CurBuffer->BufferCount] = '\0';
+		CLI_Input_s.CurBuffer->BufferCount++;
+		CLI_Input_s.CurBuffer->CursorInBuffer++;
+        CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->BufferCount] = '\0';
 
 		tmpPos++;
-		INPUT_Refresh(Input.Buffers[TransitBuffer].Data);
+        CLI_INPUT_Refresh(CLI_Input_s.Buffers[TransitBuffer].Data);
 
-		for(uint8_t pos = 0; pos < Input.CurBuffer->BufferCount - tmpPos; pos++)
+		for(uint8_t pos = 0; pos < CLI_Input_s.CurBuffer->BufferCount - tmpPos; pos++)
 		{
             CLI_PutChar(TERM_KEY_LSHIFT);
-			Input.CurBuffer->CursorInBuffer--;
+			CLI_Input_s.CurBuffer->CursorInBuffer--;
 		}
 	}
 	else
@@ -163,23 +161,23 @@ void INPUT_AddChar(char c)
 #endif	
 }
 
-void INPUT_Init()
+void CLI_INPUT_Init()
 {
 	for(uint32_t i = 0; i < INPUT_COUNT_BUFFER; i++)
 	{
-		Input.Buffers[i].Data[0] = '\0';
-		Input.Buffers[i].BufferCount = 0;
-		Input.Buffers[i].CursorInBuffer = 0;
+        CLI_Input_s.Buffers[i].Data[0] = '\0';
+        CLI_Input_s.Buffers[i].BufferCount = 0;
+        CLI_Input_s.Buffers[i].CursorInBuffer = 0;
 	}
-    
-    Input.CurBuffer = &Input.Buffers[MainBuffer];
-    
-    Q_Init(&Input.Symbols, 3, sizeof(char), QUEUE_FORCED_PUSH_POP_Msk);
+
+    CLI_Input_s.CurBuffer = &CLI_Input_s.Buffers[MainBuffer];
+
+    Q_Init(&CLI_Input_s.Symbols, 3, sizeof(char), QUEUE_FORCED_PUSH_POP_Msk);
     
     for(uint8_t i = 0; i < 3; i++)
     {
     	char c = 0;
-    	Q_Push(&Input.Symbols, &c);
+        Q_Push(&CLI_Input_s.Symbols, &c);
 	}
 }
 
@@ -192,21 +190,21 @@ uint8_t del[]		= {0x1B, 0x5B, 0x33};
 uint8_t home[]		= {0x1B, 0x5B, 0x31};
 uint8_t end[]		= {0x1B, 0x5B, 0x34};
 
-InputValue_s INPUT_PutChar(char c) {
-    InputValue_s iv;
+CLI_InputValue_t CLI_INPUT_PutChar(char c) {
+    CLI_InputValue_t iv;
 
-    Q_Push(&Input.Symbols, &c);
+    Q_Push(&CLI_Input_s.Symbols, &c);
 
-    if (Q_IsEqual(&Input.Symbols, arr_up, 3))           { c = TERM_KEY_UP; }
-    else if (Q_IsEqual(&Input.Symbols, arr_down, 3))    { c = TERM_KEY_DOWN; }
-    else if (Q_IsEqual(&Input.Symbols, arr_right, 3))   { c = TERM_KEY_RIGHT; }
-    else if (Q_IsEqual(&Input.Symbols, arr_left, 3))    { c = TERM_KEY_LEFT; }
-    else if (Q_IsEqual(&Input.Symbols, arr_esc, 3))     { c = TERM_KEY_ESCAPE; }
-    else if (Q_IsEqual(&Input.Symbols, del, 3))         { c = TERM_KEY_DEL; }
-    else if (Q_IsEqual(&Input.Symbols, home, 3))        { c = TERM_KEY_HOME; }
-    else if (Q_IsEqual(&Input.Symbols, end, 3))         { c = TERM_KEY_END; }
+    if (Q_IsEqual(&CLI_Input_s.Symbols, arr_up, 3))           { c = TERM_KEY_UP; }
+    else if (Q_IsEqual(&CLI_Input_s.Symbols, arr_down, 3))    { c = TERM_KEY_DOWN; }
+    else if (Q_IsEqual(&CLI_Input_s.Symbols, arr_right, 3))   { c = TERM_KEY_RIGHT; }
+    else if (Q_IsEqual(&CLI_Input_s.Symbols, arr_left, 3))    { c = TERM_KEY_LEFT; }
+    else if (Q_IsEqual(&CLI_Input_s.Symbols, arr_esc, 3))     { c = TERM_KEY_ESCAPE; }
+    else if (Q_IsEqual(&CLI_Input_s.Symbols, del, 3))         { c = TERM_KEY_DEL; }
+    else if (Q_IsEqual(&CLI_Input_s.Symbols, home, 3))        { c = TERM_KEY_HOME; }
+    else if (Q_IsEqual(&CLI_Input_s.Symbols, end, 3))         { c = TERM_KEY_END; }
 
-    iv.isValid = ((Input.CurBuffer->BufferCount < CLI_CMD_BUF_SIZE) ||
+    iv.isValid = ((CLI_Input_s.CurBuffer->BufferCount < CLI_CMD_BUF_SIZE) ||
                   (c == TERM_KEY_BACKSPACE) ||
                   (c == TERM_KEY_ENTER));
 
@@ -221,83 +219,83 @@ InputValue_s INPUT_PutChar(char c) {
     return iv;
 }
 
-void INPUT_Cache()
+void CLI_INPUT_Cache()
 {
-	Input.CurBuffer->Data[Input.CurBuffer->BufferCount] = '\0';
-	cli_memcpy(Input.Buffers[TransitBuffer].Data, Input.CurBuffer->Data, Input.CurBuffer->BufferCount + 1);
+    CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->BufferCount] = '\0';
+	cli_memcpy(CLI_Input_s.Buffers[TransitBuffer].Data, CLI_Input_s.CurBuffer->Data, CLI_Input_s.CurBuffer->BufferCount + 1);
 }
 
-void INPUT_Reset()
+void CLI_INPUT_Reset()
 {
-	Input.CurBuffer->CursorInBuffer = Input.CurBuffer->BufferCount = 0;
-	Input.CurBuffer->Data[Input.CurBuffer->BufferCount] = '\0';
+    CLI_Input_s.CurBuffer->CursorInBuffer = CLI_Input_s.CurBuffer->BufferCount = 0;
+    CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->BufferCount] = '\0';
 }
 
-char INPUT_GetLastChar()						{ return Input.CurBuffer->Data[Input.CurBuffer->BufferCount - 1];	}
+char CLI_INPUT_GetLastChar()						{ return CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->BufferCount - 1];	}
 
-void INPUT_CursorTo(uint16_t pos)				{ Input.CurBuffer->CursorInBuffer = pos; }
+void CLI_INPUT_CursorTo(uint16_t pos)				{ CLI_Input_s.CurBuffer->CursorInBuffer = pos; }
 
-void INPUT_CursorShift(int16_t shift)			{ Input.CurBuffer->CursorInBuffer += shift; }
+void CLI_INPUT_CursorShift(int16_t shift)			{ CLI_Input_s.CurBuffer->CursorInBuffer += shift; }
 
-char* INPUT_GetBuffer(InputBufferType_e type)	{ return Input.Buffers[type].Data; }
+char* CLI_INPUT_GetBuffer(CLI_InputBufferType_t type)	{ return CLI_Input_s.Buffers[type].Data; }
 
-void INPUT_SetBuffer(InputBufferType_e type, char* buffer, uint32_t len)
+void CLI_INPUT_SetBuffer(CLI_InputBufferType_t type, char* buffer, uint32_t len)
 {
-	cli_memcpy(Input.Buffers[type].Data, buffer, len);
-	Input.CurBuffer->BufferCount = Input.CurBuffer->CursorInBuffer = len;
+	cli_memcpy(CLI_Input_s.Buffers[type].Data, buffer, len);
+    CLI_Input_s.CurBuffer->BufferCount = CLI_Input_s.CurBuffer->CursorInBuffer = len;
 }
 
-void INPUT_CursorToHome()
+void CLI_INPUT_CursorToHome()
 {
-	while(Input.CurBuffer->CursorInBuffer > 0)
+	while(CLI_Input_s.CurBuffer->CursorInBuffer > 0)
 	{
-		CLI_PutChar(TERM_KEY_LSHIFT);
-		INPUT_CursorShift(-1);
+        CLI_PutChar(TERM_KEY_LSHIFT);
+        CLI_INPUT_CursorShift(-1);
 	}
 }
 
-void INPUT_CursorToEnd()
+void CLI_INPUT_CursorToEnd()
 {
-	while(Input.CurBuffer->CursorInBuffer < Input.CurBuffer->BufferCount)
+	while(CLI_Input_s.CurBuffer->CursorInBuffer < CLI_Input_s.CurBuffer->BufferCount)
 	{
-		CLI_PutChar(Input.CurBuffer->Data[Input.CurBuffer->CursorInBuffer]);
-		INPUT_CursorShift(1);
+        CLI_PutChar(CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->CursorInBuffer]);
+        CLI_INPUT_CursorShift(1);
 	}
 }
 
-void INPUT_CursorToLeft()
+void CLI_INPUT_CursorToLeft()
 {
-	if (Input.CurBuffer->CursorInBuffer > 0)
+	if (CLI_Input_s.CurBuffer->CursorInBuffer > 0)
 	{
-		INPUT_CursorShift(-1);
+        CLI_INPUT_CursorShift(-1);
         CLI_PutChar(TERM_KEY_LSHIFT);
 	}
 }
 
-void INPUT_CursorToRight()
+void CLI_INPUT_CursorToRight()
 {
-	if (Input.CurBuffer->CursorInBuffer < Input.CurBuffer->BufferCount)
+	if (CLI_Input_s.CurBuffer->CursorInBuffer < CLI_Input_s.CurBuffer->BufferCount)
 	{
-        CLI_PutChar(Input.CurBuffer->Data[Input.CurBuffer->CursorInBuffer]);
-        INPUT_CursorShift(1);
+        CLI_PutChar(CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->CursorInBuffer]);
+        CLI_INPUT_CursorShift(1);
 	}	
 }
 
-void INPUT_Delete()
+void CLI_INPUT_Delete()
 {
-	if ((Input.CurBuffer->CursorInBuffer != Input.CurBuffer->BufferCount) && (!INPUT_IsEmpty()))
+	if ((CLI_Input_s.CurBuffer->CursorInBuffer != CLI_Input_s.CurBuffer->BufferCount) && (!CLI_INPUT_IsEmpty()))
 	{
-		INPUT_CursorShift(1);
-		if(Input.CurBuffer->CursorInBuffer != Input.CurBuffer->BufferCount)
+        CLI_INPUT_CursorShift(1);
+		if(CLI_Input_s.CurBuffer->CursorInBuffer != CLI_Input_s.CurBuffer->BufferCount)
 		{
-			CLI_PutChar(Input.CurBuffer->Data[Input.CurBuffer->CursorInBuffer - 1]);
+            CLI_PutChar(CLI_Input_s.CurBuffer->Data[CLI_Input_s.CurBuffer->CursorInBuffer - 1]);
 		}
-		INPUT_RemChar();
+        CLI_INPUT_RemChar();
 	}	
 }
 
-void INPUT_Backspace()
+void CLI_INPUT_Backspace()
 {
-	if (!INPUT_IsEmpty() && (Input.CurBuffer->CursorInBuffer > 0))
-		INPUT_RemChar();
+	if (!CLI_INPUT_IsEmpty() && (CLI_Input_s.CurBuffer->CursorInBuffer > 0))
+        CLI_INPUT_RemChar();
 }
