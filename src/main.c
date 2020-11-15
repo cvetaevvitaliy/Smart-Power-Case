@@ -1,8 +1,8 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
-#include "device/usb_device.h"
+#include "usb_device.h"
 #include "main_app.h"
-#include "device/dwt_stm32_delay.h"
+#include "dwt_stm32_delay.h"
 
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;

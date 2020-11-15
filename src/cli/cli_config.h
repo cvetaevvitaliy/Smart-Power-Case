@@ -34,6 +34,7 @@
 #define TERM_KEY_HOME                       (_KEY_INIT(0xA0))        // Home key
 #define TERM_KEY_END                        (_KEY_INIT(0xA1))        // End key
 #define TERM_KEY_TAB                        (_KEY_INIT(0x09))        // TAB key
+#define TERM_KEY_CONF                       (_KEY_INIT(0x60))        // Configurator
 
 // **************************************************************************
 
@@ -72,12 +73,11 @@
 #define CLI_CMD_LOG_EN                      (1)            // Command logging (history)
 #define CLI_CMD_AUTOCMPLT_EN                (1)            // Command AutoComplete
 #define CLI_LR_KEY_EN                       (1)            // Move cursor left-rigth
-#define CLI_DEFAULT_ALLOC_EN                (1)            // Default Memory Allocate functions (use static or malloc memmory for add new command)
+#define CLI_DEFAULT_ALLOC_EN                (0)            // Default Memory Allocate functions (use static or malloc memmory for add new command)
 #define CLI_DEFAULT_STRING_EN               (1)            // Default String functions
 #define CLI_PRINT_ERROR_EXEC_EN             (1)            // Print error after execute command
 #define CLI_PRINT_ERROR_ADD_CMD_EN          (1)            // Print error after added command
 #define ECHO_EN                             (1)            // Enter echo enable
-#define DEBUG_FW                            (1)            // Debug firmware
 
 // **************************************************************************
 
@@ -99,10 +99,14 @@ extern char dbgbuffer[128];
 // ***********************   IO Debug CLI Settings    ***********************
 
 /**< This macro for debug software */
-#if (DEBUG_FW == 1)
+#if (DEBUG == 1)
 #define LOG_DEBUG(f_, ...) printf(("\n[DEBUG] "f_), ##__VA_ARGS__)
 #define LOG_INFO(f_, ...) printf(("\n[INFO] "f_), ##__VA_ARGS__)
 #define LOG_ERROR(f_, ...) printf(("\n[ERROR] "f_), ##__VA_ARGS__)
+#else
+#define LOG_DEBUG(f_, ...)
+#define LOG_INFO(f_, ...)
+#define LOG_ERROR(f_, ...)
 #endif
 
 // **************************************************************************
@@ -133,7 +137,7 @@ extern volatile uint64_t SysTic;
 
 #if (CLI_DEFAULT_ALLOC_EN == 1)
 #include <malloc.h>
-#define cli_malloc    malloc                  // dynamic memory
+#define cli_malloc      malloc                  // dynamic memory
 #define cli_free        free                    // dynamic memory
 #else
 #include "static_memory.h"

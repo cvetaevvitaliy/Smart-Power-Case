@@ -3,7 +3,7 @@
 ********************************/
 #ifndef FATSHARK_POWER_V1_POWER_H
 #define FATSHARK_POWER_V1_POWER_H
-#include "../main.h"
+#include "main.h"
 #include "stm32f1xx_hal.h"
 #include "main_app.h"
 

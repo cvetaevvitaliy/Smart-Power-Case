@@ -10,8 +10,4 @@
 /** Write to static memory what we defined before compilation */
 char* init_static_memory(uint8_t n);
 
-/** Static memory cannot be freed, it is static */
-void free_static (char* data);
-
-
 #endif

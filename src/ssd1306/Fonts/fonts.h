@@ -1,8 +1,6 @@
+#ifndef FONTS_H_
+#define FONTS_H_
 #include "stdint.h"
-
-
-#ifndef Fonts
-#define Fonts
 
 
 typedef struct {
