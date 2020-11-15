@@ -25,11 +25,22 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_RTC_Init(void);
 static void USB_Reset_GPIO(void);
+static inline void System_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 
 int main(void) {
+
+    System_Init();
+
+    while (1) {
+        App_Loop(); // main loop, what's "spinning" in the main_app module
+    }
+
+}
+
+inline void System_Init(void){
 
     HAL_Init();
     SystemClock_Config();
@@ -45,11 +56,6 @@ int main(void) {
     App_Init();
     if (!App_Check_StartUp())
         _Error_Handler(__FILE__, __LINE__);
-
-    while (1) {
-        App_Loop();
-
-    }
 
 }
 
