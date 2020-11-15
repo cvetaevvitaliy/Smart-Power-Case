@@ -3,9 +3,9 @@
 uint32_t _def_time_ms;
 
 /// \brief Generate CLI_Time_s struct from milliseconds
-CLI_Time_s CLI_GetFormatTimeByMs(uint32_t msec)
+CLI_Time_t CLI_GetFormatTimeByMs(uint32_t msec)
 {
-    CLI_Time_s res;
+    CLI_Time_t res;
 	res.msec = msec % 1000;
 	uint32_t s = msec / 1000;
 	res.second = s % 60;
@@ -27,7 +27,7 @@ inline void CLI_SetBaseTimeFromHMS(uint32_t h, uint32_t m, uint32_t s)
 	_def_time_ms = h * 3600000 + m * 60000 + s * 1000;
 }
 
-inline CLI_Time_s CLI_GetFormatLastTimeByMs(uint32_t msec)
+inline CLI_Time_t CLI_GetFormatLastTimeByMs(uint32_t msec)
 {
 	return CLI_GetFormatTimeByMs(msec + _def_time_ms);
 }

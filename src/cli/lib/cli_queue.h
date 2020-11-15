@@ -14,13 +14,12 @@ typedef struct
     uint16_t _cntr;			// queue count added objects
     uint8_t sizeObj;		// one object size
     uint32_t mode;			// queue work mode
-} Queue_s;
+} CLI_Queue_t;
 
 #define QUEUE_FORCED_PUSH_POP_Msk		(0x01)		// Forced queue filling
 
-typedef Queue_s QueueObj;
+typedef CLI_Queue_t QueueObj;
 
-void Q_Free(QueueObj* qd);
 void Q_Init(QueueObj* qd, uint16_t sizeQueue, uint8_t sizeObj, uint32_t mode);
 bool Q_Push(QueueObj* qd, const void* value);
 bool Q_Pop(QueueObj* qd, void* value);
