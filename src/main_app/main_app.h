@@ -13,7 +13,7 @@
 #endif
 #include "ssd1306.h"
 #include "stdbool.h"
-#include "BQ27441.h"
+#include "bq27441.h"
 #include "bq2589x_charger.h"
 #include "CLI_comands.h"
 
