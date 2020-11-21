@@ -3,7 +3,7 @@
 ********************************/
 #ifndef FATSHARK_POWER_V1_BQ27441_H
 #define FATSHARK_POWER_V1_BQ27441_H
-#include "BQ27441_Definitions.h"
+#include "bq27441_definitions.h"
 #include "main_app.h"
 
 #define BQ72441_I2C_TIMEOUT 20000

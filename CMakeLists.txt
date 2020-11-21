@@ -46,6 +46,8 @@ foreach(MCU ${TYPE_MCU_STM})
         message(STM32F103T8U)
         set(MCU STM32F103T8U)
         set(EEPROM 0x800FC00)
+        set(FLASH_SIZE 0x8001000)
+        set(FLASH_SIZE_DEC 64K)
         add_definitions(-DMCU=\"STM32F103T8U\")
     else()
         add_definitions(-DSTM32F103TBU)
@@ -53,14 +55,16 @@ foreach(MCU ${TYPE_MCU_STM})
         message(STM32F103TBU)
         set(MCU STM32F103TBU)
         set(EEPROM 0x801FC00)
+        set(FLASH_SIZE 0x8010000)
+        set(FLASH_SIZE_DEC 128K)
         SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103TBUx_FLASH.ld)
         add_definitions(-DMCU=\"STM32F103TBU\")
     endif()
 endforeach()
 
-SET(CMAKE_C_COMPILER_WORKS 1)
+#SET(CMAKE_C_COMPILER_WORKS 1)
 SET(CMAKE_C_COMPILER arm-none-eabi-gcc)
-SET(CMAKE_CXX_COMPILER_WORKS 1)
+#SET(CMAKE_CXX_COMPILER_WORKS 1)
 SET(CMAKE_CXX_COMPILER arm-none-eabi-g++)
 set(CMAKE_ASM_COMPILER  arm-none-eabi-gcc)
 set(CMAKE_AR arm-none-eabi-ar)
@@ -104,6 +108,8 @@ include_directories(src
         src/cli
         src/cli/lib
         src/main_app
+        src/bq25895
+        src/bq27441
         drivers/STM32F1xx_HAL_Driver/Inc
         drivers/STM32F1xx_HAL_Driver/Inc/Legacy
         drivers/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
@@ -119,19 +125,30 @@ set(CMAKE_EXE_LINKER_FLAGS
 
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin)
 
+if(NOT WIN32)
+    string(ASCII 27 Esc)
+    set(ColourReset "${Esc}[m")
+    set(ColourBold  "${Esc}[1m")
+    set(Red         "${Esc}[31m")
+    set(Green       "${Esc}[32m")
+    set(Yellow      "${Esc}[33m")
+    set(Blue        "${Esc}[34m")
+endif()
+
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${SIZE} --format=berkeley ${PROJECT_NAME}.elf
         COMMAND arm-none-eabi-objcopy -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+        COMMAND echo
         #COMMAND ${CMAKE_OBJDUMP} -x $<TARGET_FILE:${PROJECT_NAME}.elf>
-        COMMAND echo \"*****************************************************************\"
-        COMMAND echo Start create Full firmware for flash via SWD
-        COMMAND echo In Flash memory 0x8000000 bootloader.bin
-        COMMAND echo In Flash memory 0x8000800 ${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin
-        COMMAND echo In Flash memory 0x801FC00 eeprom data for STM32F103TBU and 0x800FC00 for STM32F103T8U
+        COMMAND echo "${Yellow}Start create FullFW.bin ${FLASH_SIZE_DEC} firmware for flash via SWD ${ColourReset}"
+        COMMAND echo \"${Green}*********************************************************${ColourReset}\"
+        COMMAND echo "${Green}*     0x8000000 to 0x8000800 bootloader.bin             *${ColourReset}"
+        COMMAND echo "${Green}*     0x8000800 to ${EEPROM} ${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin         *${ColourReset}"
+        COMMAND echo "${Green}*     ${EEPROM} to ${FLASH_SIZE} EEPROM data                *${ColourReset}"
+        COMMAND echo \"${Green}*********************************************************${ColourReset}\"
         COMMAND dd if=${PROJECT_SOURCE_DIR}/bootloader.bin of=FullFW.bin bs=1 count=2048
         COMMAND dd if=${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin of=FullFW.bin bs=1 seek=2048
         COMMAND dd if=${PROJECT_SOURCE_DIR}/eeprom.bin of=FullFW.bin bs=1 seek=${SEEK_DATA}
-        COMMAND echo File FullFW.bin created complete
-        COMMAND echo \"*****************************************************************\"
+        COMMAND echo "${Yellow}File FullFW.bin created ${ColourReset}"
         COMMENT "Building ${HEX_FILE}
 Building ${BIN_FILE}")

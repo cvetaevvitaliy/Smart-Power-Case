@@ -1,7 +1,7 @@
 /********************************
 * Created by Vitaliy on 4/28/20.
 ********************************/
-#include "BQ27441.h"
+#include "bq27441.h"
 
 //#define USE_DMA_BQ27441
 #define BQ27441_I2C_PORT		hi2c1

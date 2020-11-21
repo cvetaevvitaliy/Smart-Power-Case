@@ -2,7 +2,7 @@
 * Created by Vitaliy on 5/28/20.
 ********************************/
 #include "Settings_Eeprom.h"
-#include "BQ27441.h"
+#include "bq27441.h"
 
 #define START_VIRTUAL_ADDRESS      1
 
