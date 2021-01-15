@@ -26,35 +26,35 @@ jobs:
          release: '7-2018-q2'
       
     - name: Create Build folder
-      run: cmake -E make_directory ${{runner.workspace}}/smart-power-case/build
+      run: cmake -E make_directory ${{runner.workspace}}/Smart-Power-Case/build
       
     - name: Configure CMake project - Build STM32F103TBU 128kb Flash
-      working-directory: ${{runner.workspace}}/smart-power-case/build
+      working-directory: ${{runner.workspace}}/Smart-Power-Case/build
       shell: bash
       run: cmake -DDEBUG=OFF -DTYPE_MCU=F103TBU ..
       
     - name: Build STM32F103TBU 128kb Flash
-      working-directory: ${{runner.workspace}}/smart-power-case/build
+      working-directory: ${{runner.workspace}}/Smart-Power-Case/build
       shell: bash
       run: make -j11
 
     - name: Clean
-      working-directory: ${{runner.workspace}}/smart-power-case/build
+      working-directory: ${{runner.workspace}}/Smart-Power-Case/build
       shell: bash
       run: make clean
 
     - name: Configure CMake project - Build STM32F103T8U 64kb Flash
-      working-directory: ${{runner.workspace}}/smart-power-case/build
+      working-directory: ${{runner.workspace}}/Smart-Power-Case/build
       shell: bash
       run: cmake -DDEBUG=OFF -DTYPE_MCU=F103T8U ..
 
     - name: Build STM32F103T8U 64kb Flash
-      working-directory: ${{runner.workspace}}/smart-power-case/build
+      working-directory: ${{runner.workspace}}/Smart-Power-Case/build
       shell: bash
       run: make -j11
 
     - name: Clean
-      working-directory: ${{runner.workspace}}/smart-power-case/build
+      working-directory: ${{runner.workspace}}/Smart-Power-Case/build
       shell: bash
       run: make clean
 
@@ -63,10 +63,10 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: "Download artifacts - HEX"
-        path: ${{runner.workspace}}/smart-power-case/build/*.hex
+        path: ${{runner.workspace}}/Smart-Power-Case/build/*.hex
         
     - name: Upload Artifacts BIN
       uses: actions/upload-artifact@v2
       with:
         name: "Download artifacts - BIN"
-        path: ${{runner.workspace}}/smart-power-case/build/*.bin
+        path: ${{runner.workspace}}/Smart-Power-Case/build/*.bin
