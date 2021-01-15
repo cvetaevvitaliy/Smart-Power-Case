@@ -147,7 +147,7 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND echo "${Green}*     ${EEPROM} to ${FLASH_SIZE} EEPROM data                *${ColourReset}"
         COMMAND echo \"${Green}*********************************************************${ColourReset}\"
         COMMAND dd if=${PROJECT_SOURCE_DIR}/bootloader.bin of=FullFW_${TYPE_MCU}.bin bs=1 count=2048
-        COMMAND dd if=${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}.bin of=FullFW_${TYPE_MCU}.bin bs=1 seek=2048
+        COMMAND dd if=${PROJECT_BINARY_DIR}/${FIRMWARE_NAME}-${VERSION_RELEASE}.${VERSION_MAJOR}.${VERSION_MINOR}_${TYPE_MCU}.bin of=FullFW_${TYPE_MCU}.bin bs=1 seek=2048
         COMMAND dd if=${PROJECT_SOURCE_DIR}/eeprom.bin of=FullFW_${TYPE_MCU}.bin bs=1 seek=${SEEK_DATA}
         COMMAND echo "${Yellow}File FullFW.bin created ${ColourReset}"
         COMMENT "Building ${HEX_FILE}
