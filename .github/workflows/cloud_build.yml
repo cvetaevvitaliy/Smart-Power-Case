@@ -58,12 +58,6 @@ jobs:
       shell: bash
       run: make clean
 
-
-    - name: Upload Artifacts HEX
-      uses: actions/upload-artifact@v2
-      with:
-        name: "Download artifacts - HEX"
-        path: ${{runner.workspace}}/Smart-Power-Case/build/*.hex
         
     - name: Upload Artifacts BIN
       uses: actions/upload-artifact@v2
